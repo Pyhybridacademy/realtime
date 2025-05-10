@@ -413,3 +413,44 @@ html {
     opacity: 1 !important;
   }
   
+  /* Add this to your existing styles.css file */
+
+/* Fix for horizontal overflow */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Responsive fixes for the commitment section */
+@media (max-width: 768px) {
+  .relative.max-w-lg.mx-auto {
+    padding: 0 10px;
+  }
+
+  .absolute.top-0.right-0 {
+    position: relative;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Responsive logo and button styles */
+@media (max-width: 640px) {
+  .site-logo {
+    font-size: 1.25rem;
+  }
+
+  .site-logo svg {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .join-now-btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+  }
+}
