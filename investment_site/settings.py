@@ -168,3 +168,6 @@ if DEBUG:
 
 # Site URL for links in emails
 SITE_URL = 'https://realtime-awxx.onrender.com'  # Change this in production
+
+# Add this to your settings.py file
+CSRF_TRUSTED_ORIGINS = ['https://realtime-awxx.onrender.com']
