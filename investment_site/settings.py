@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-kpd2@cuv#q5u9qub9ey5w-v(x4_-xk)w3oi9=evce$(=5r)g6m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['realtime-awxx.onrender.com', '*']
 
 
 # Application definition
