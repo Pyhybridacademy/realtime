@@ -1,0 +1,32 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}Oops! Bad Request{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50">
+    <div class="bg-white p-8 rounded-xl shadow-sm max-w-md w-full text-center border border-gray-100">
+        <div class="mb-6">
+            <h1 class="text-6xl font-bold text-emerald-500 mb-2">400</h1>
+            <h2 class="text-2xl font-semibold text-gray-800">Something's not quite right</h2>
+            <p class="text-gray-600 mt-2">We couldn't understand your request. Let's try that again!</p>
+        </div>
+        
+        <div class="mb-6">
+            <svg class="mx-auto h-48 w-48" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="100" cy="100" r="80" fill="#D1FAE5" stroke="#10B981" stroke-width="8"/>
+                <path d="M70 100 H130 M70 100 L100 130 M100 130 L130 100" stroke="#10B981" stroke-width="10" stroke-linecap="round"/>
+                <circle cx="100" cy="60" r="10" fill="#10B981"/>
+            </svg>
+        </div>
+        
+        <div class="space-y-3">
+            <a href="{% url 'dashboard' %}" class="block w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-lg transition duration-200 shadow-sm hover:shadow-md">
+                🏡 Take me home
+            </a>
+            <a href="javascript:history.back()" class="block w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition duration-200 border border-gray-200 hover:border-gray-300">
+                ↩ Try again
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

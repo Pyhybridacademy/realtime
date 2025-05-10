@@ -61,4 +61,5 @@ urlpatterns = [
     path('terms-conditions/', views.terms_conditions, name='terms_conditions'),
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
     path('faqs/', views.faqs, name='faqs'),
+    
 ]

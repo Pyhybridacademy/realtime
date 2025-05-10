@@ -40,20 +40,20 @@
                             </svg>
                             {% endif %}
                         </div>
-                        <div class="ml-5 flex-1">
-                            <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <div class="ml-5 flex-1 min-w-0">
+                            <div class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                                 {{ wallet.get_crypto_type_display }}
                             </div>
-                            <div class="flex items-baseline mt-1">
-                                <div class="text-2xl font-bold text-gray-800 dark:text-white">
+                            <div class="mt-1">
+                                <div class="text-2xl font-bold text-gray-800 dark:text-white truncate">
                                     {{ wallet.balance }}
+                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400 ml-1">
+                                        {{ wallet.crypto_type }}
+                                    </span>
                                 </div>
-                                <div class="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-                                    {{ wallet.crypto_type }}
-                                </div>
-                                <dd class="text-sm text-gray-500">
+                                <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
                                     ≈ {{ wallet.get_user_currency_value }}
-                                </dd>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -85,210 +85,213 @@
         </div>
 
         <!-- Payment Methods Section -->
-<div class="mb-8">
-    <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold text-gray-800 dark:text-white">Payment Methods</h2>
-        <div class="flex space-x-3">
-            <a href="{% url 'add_bank' %}" class="inline-flex items-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors duration-200">
-                <i class="fas fa-plus mr-2"></i>
-                Add Bank
-            </a>
-            <a href="{% url 'add_card' %}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors duration-200">
-                <i class="fas fa-plus mr-2"></i>
-                Add Card
-            </a>
-        </div>
-    </div>
-    <!-- Tabs -->
-    <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
-        <nav class="flex -mb-px space-x-8">
-            <button id="tab-banks" class="tab-button border-primary-500 text-primary-600 dark:text-primary-400 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-                Bank Accounts
-            </button>
-            <button id="tab-cards" class="tab-button border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-                Cards
-            </button>
-        </nav>
-    </div>
-    
-    <!-- Bank Accounts Panel -->
-    <div id="panel-banks" class="tab-panel bg-white dark:bg-gray-800 rounded-xl shadow-card dark:shadow-card-dark overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Bank Name
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Account Number
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Account Holder
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Account Type
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Actions
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {% for bank in user.banks.all %}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full">
-                                    <i class="fas fa-university"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-800 dark:text-white">{{ bank.bank_name }}</div>
-                                    {% if bank.swift_code %}
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">SWIFT: {{ bank.swift_code }}</div>
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white">Payment Methods</h2>
+                <div class="flex space-x-3">
+                    <a href="{% url 'add_bank' %}" class="inline-flex items-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Bank
+                    </a>
+                    <a href="{% url 'add_card' %}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Card
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                <nav class="flex -mb-px space-x-8">
+                    <button id="tab-banks" class="tab-button border-primary-500 text-primary-600 dark:text-primary-400 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Bank Accounts
+                    </button>
+                    <button id="tab-cards" class="tab-button border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Cards
+                    </button>
+                </nav>
+            </div>
+            
+            <!-- Bank Accounts Panel -->
+            <div id="panel-banks" class="tab-panel bg-white dark:bg-gray-800 rounded-xl shadow-card dark:shadow-card-dark overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Bank Name
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Account Number
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Account Holder
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Account Type
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            {% for bank in user.banks.all %}
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full">
+                                            <i class="fas fa-university"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-800 dark:text-white">{{ bank.bank_name }}</div>
+                                            {% if bank.swift_code %}
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">SWIFT: {{ bank.swift_code }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-white">
+                                    {{ bank.get_masked_account_number }}
+                                    {% if bank.iban %}
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">IBAN: {{ bank.iban }}</div>
                                     {% endif %}
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-white">
-                            {{ bank.get_masked_account_number }}
-                            {% if bank.iban %}
-                            <div class="text-xs text-gray-500 dark:text-gray-400">IBAN: {{ bank.iban }}</div>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-white">
-                            {{ bank.account_holder }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if bank.account_type %}
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                {{ bank.get_account_type_display }}
-                            </span>
-                            {% else %}
-                            <span class="text-sm text-gray-500 dark:text-gray-400">—</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{% url 'edit_bank' bank.id %}" class="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 mr-3">Edit</a>
-                            <form method="POST" action="{% url 'delete_bank' bank.id %}" class="inline">
-                                {% csrf_token %}
-                                <button type="submit" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" onclick="return confirm('Are you sure you want to delete this bank account?')">
-                                    Remove
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="px-6 py-12 text-center">
-                            <div class="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
-                                <i class="fas fa-university text-4xl mb-3"></i>
-                                <p class="mb-4">No bank accounts added yet</p>
-                                <a href="{% url 'add_bank' %}" class="inline-flex items-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors duration-200">
-                                    <i class="fas fa-plus mr-2"></i>
-                                    Add Bank Account
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    
-    <!-- Cards Panel -->
-    <div id="panel-cards" class="tab-panel bg-white dark:bg-gray-800 rounded-xl shadow-card dark:shadow-card-dark overflow-hidden hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Card Type
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Card Number
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Cardholder
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Expiry
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Actions
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {% for card in user.cards.all %}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full
-                                    {% if card.card_type == 'visa' %}bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300
-                                    {% elif card.card_type == 'mastercard' %}bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300
-                                    {% elif card.card_type == 'amex' %}bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300
-                                    {% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300{% endif %}">
-                                    {% if card.card_type == 'visa' %}
-                                    <i class="fab fa-cc-visa"></i>
-                                    {% elif card.card_type == 'mastercard' %}
-                                    <i class="fab fa-cc-mastercard"></i>
-                                    {% elif card.card_type == 'amex' %}
-                                    <i class="fab fa-cc-amex"></i>
-                                    {% else %}
-                                    <i class="far fa-credit-card"></i>
-                                    {% endif %}
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-800 dark:text-white">{{ card.get_card_type_display }}</div>
-                                    {% if card.is_default %}
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                        Default
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-white">
+                                    {{ bank.account_holder }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if bank.account_type %}
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                        {{ bank.get_account_type_display }}
                                     </span>
+                                    {% else %}
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">—</span>
                                     {% endif %}
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-white">
-                            {{ card.get_masked_card_number }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-white">
-                            {% if card.cardholder_name %}
-                            {{ card.cardholder_name }}
-                            {% else %}
-                            <span class="text-gray-500 dark:text-gray-400">—</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-white">
-                            {{ card.expiry_date }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{% url 'edit_card' card.id %}" class="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 mr-3">Edit</a>
-                            <form method="POST" action="{% url 'delete_card' card.id %}" class="inline">
-                                {% csrf_token %}
-                                <button type="submit" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" onclick="return confirm('Are you sure you want to delete this card?')">
-                                    Remove
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="px-6 py-12 text-center">
-                            <div class="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
-                                <i class="far fa-credit-card text-4xl mb-3"></i>
-                                <p class="mb-4">No cards added yet</p>
-                                <a href="{% url 'add_card' %}" class="inline-flex items-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors duration-200">
-                                    <i class="fas fa-plus mr-2"></i>
-                                    Add Card
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="{% url 'edit_bank' bank.id %}" class="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 mr-3">Edit</a>
+                                    <form method="POST" action="{% url 'delete_bank' bank.id %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" onclick="return confirm('Are you sure you want to delete this bank account?')">
+                                            Remove
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
+                                        <i class="fas fa-university text-4xl mb-3"></i>
+                                        <p class="mb-4">No bank accounts added yet</p>
+                                        <a href="{% url 'add_bank' %}" class="inline-flex items-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors duration-200">
+                                            <i class="fas fa-plus mr-2"></i>
+                                            Add Bank Account
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Cards Panel -->
+            <div id="panel-cards" class="tab-panel bg-white dark:bg-gray-800 rounded-xl shadow-card dark:shadow-card-dark overflow-hidden hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Card Type
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Card Number
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Cardholder
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Expiry
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            {% for card in user.cards.all %}
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full
+                                            {% if card.card_type == 'visa' %}bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300
+                                            {% elif card.card_type == 'mastercard' %}bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300
+                                            {% elif card.card_type == 'amex' %}bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300
+                                            {% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300{% endif %}">
+                                            {% if card.card_type == 'visa' %}
+                                            <i class="fab fa-cc-visa"></i>
+                                            {% elif card.card_type == 'mastercard' %}
+                                            <i class="fab fa-cc-mastercard"></i>
+                                            {% elif card.card_type == 'amex' %}
+                                            <i class="fab fa-cc-amex"></i>
+                                            {% else %}
+                                            <i class="far fa-credit-card"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-800 dark:text-white">{{ card.get_card_type_display }}</div>
+                                            {% if card.is_default %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                                Default
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-white">
+                                    {{ card.get_masked_card_number }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-white">
+                                    {% if card.cardholder_name %}
+                                    {{ card.cardholder_name }}
+                                    {% else %}
+                                    <span class="text-gray-500 dark:text-gray-400">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-white">
+                                    {{ card.expiry_date }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="{% url 'edit_card' card.id %}" class="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 mr-3">Edit</a>
+                                    <form method="POST" action="{% url 'delete_card' card.id %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" onclick="return confirm('Are you sure you want to delete this card?')">
+                                            Remove
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
+                                        <i class="far fa-credit-card text-4xl mb-3"></i>
+                                        <p class="mb-4">No cards added yet</p>
+                                        <a href="{% url 'add_card' %}" class="inline-flex items-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors duration-200">
+                                            <i class="fas fa-plus mr-2"></i>
+                                            Add Card
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>

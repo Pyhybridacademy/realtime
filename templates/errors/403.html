@@ -1,0 +1,32 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}Access Restricted{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50">
+    <div class="bg-white p-8 rounded-xl shadow-sm max-w-md w-full text-center border border-gray-100">
+        <div class="mb-6">
+            <h1 class="text-6xl font-bold text-rose-500 mb-2">403</h1>
+            <h2 class="text-2xl font-semibold text-gray-800">Special access required</h2>
+            <p class="text-gray-600 mt-2">This area is for authorized explorers only. Let's find you the right path!</p>
+        </div>
+        
+        <div class="mb-6">
+            <svg class="mx-auto h-48 w-48" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <rect x="50" y="80" width="100" height="70" rx="5" fill="#FEE2E2" stroke="#F43F5E" stroke-width="8"/>
+                <rect x="80" y="50" width="40" height="30" rx="3" fill="#FEE2E2" stroke="#F43F5E" stroke-width="8"/>
+                <circle cx="100" cy="115" r="5" fill="#F43F5E"/>
+            </svg>
+        </div>
+        
+        <div class="space-y-3">
+            <a href="{% url 'dashboard' %}" class="block w-full py-3 px-4 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-lg transition duration-200 shadow-sm hover:shadow-md">
+                🏡 Take me home
+            </a>
+            <a href="mailto:support@example.com" class="block w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition duration-200 border border-gray-200 hover:border-gray-300">
+                ✉ Request access
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

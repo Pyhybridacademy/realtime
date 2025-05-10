@@ -1,0 +1,34 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}Oops! Page Not Found{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50">
+    <div class="bg-white p-8 rounded-xl shadow-sm max-w-md w-full text-center border border-gray-100">
+        <div class="mb-6">
+            <h1 class="text-6xl font-bold text-indigo-500 mb-2">404</h1>
+            <h2 class="text-2xl font-semibold text-gray-800">Oh dear! We're lost</h2>
+            <p class="text-gray-600 mt-2">The page you're looking for has wandered off. Maybe it's out exploring?</p>
+        </div>
+        
+        <div class="mb-6">
+            <svg class="mx-auto h-48 w-48" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="100" cy="100" r="80" fill="#EFF6FF" stroke="#6366F1" stroke-width="8"/>
+                <circle cx="70" cy="80" r="10" fill="#6366F1"/>
+                <circle cx="130" cy="80" r="10" fill="#6366F1"/>
+                <path d="M70 130 Q100 150 130 130" fill="none" stroke="#6366F1" stroke-width="6" stroke-linecap="round"/>
+                <path d="M60 40 L30 10 M140 40 L170 10" stroke="#F59E0B" stroke-width="6" stroke-linecap="round"/>
+            </svg>
+        </div>
+        
+        <div class="space-y-3">
+            <a href="{% url 'dashboard' %}" class="block w-full py-3 px-4 bg-indigo-500 hover:bg-indigo-600 text-white font-medium rounded-lg transition duration-200 shadow-sm hover:shadow-md">
+                🏡 Take me home
+            </a>
+            <a href="javascript:history.back()" class="block w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition duration-200 border border-gray-200 hover:border-gray-300">
+                ↩ Try again
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

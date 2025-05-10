@@ -246,3 +246,21 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'You have been successfully logged out.')
     return redirect('login')
+
+def error_404(request, exception):
+    """Handle 404 (Page Not Found) errors"""
+    return render(request, 'errors/404.html', status=404)
+
+def error_500(request):
+    """Handle 500 (Server Error) errors"""
+    return render(request, 'errors/500.html', status=500)
+
+def error_403(request, exception):
+    """Handle 403 (Forbidden) errors"""
+    return render(request, 'errors/403.html', status=403)
+
+def error_400(request, exception):
+    """Handle 400 (Bad Request) errors"""
+    return render(request, 'errors/400.html', status=400)
+
+
