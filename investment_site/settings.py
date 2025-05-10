@@ -70,6 +70,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'notifications.context_processors.notifications',
                 'admin_panel.context_processors.system_settings',
+                'admin_panel.context_processors.admin_stats',
                 'wallet.context_processors.exchange_rates',
             ],
         },

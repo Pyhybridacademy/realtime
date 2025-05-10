@@ -1,0 +1,128 @@
+{% extends "admin_panel/base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Profile Information Card -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="card-title">Admin Profile</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="Admin Avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                        {% else %}
+                            <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center bg-primary text-white" style="width: 150px; height: 150px; margin: 0 auto;">
+                                <span style="font-size: 50px;">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5 class="text-muted mb-1">Full Name</h5>
+                        <p class="lead">{{ user.first_name }} {{ user.last_name }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5 class="text-muted mb-1">Email</h5>
+                        <p class="lead">{{ user.email }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5 class="text-muted mb-1">Role</h5>
+                        <p class="lead">
+                            {% if user.is_superuser %}
+                                Super Administrator
+                            {% else %}
+                                Administrator
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5 class="text-muted mb-1">Last Login</h5>
+                        <p class="lead">{{ user.last_login|date:"F d, Y H:i" }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5 class="text-muted mb-1">Date Joined</h5>
+                        <p class="lead">{{ user.date_joined|date:"F d, Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Change Password Card -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Change Password</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                    <div class="messages mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group mb-4">
+                            <label for="id_old_password" class="form-label">Current Password</label>
+                            <input type="password" name="old_password" class="form-control" autocomplete="current-password" autofocus required id="id_old_password">
+                            {% if password_form.old_password.errors %}
+                            <div class="text-danger mt-2">
+                                {% for error in password_form.old_password.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label for="id_new_password1" class="form-label">New Password</label>
+                            <input type="password" name="new_password1" class="form-control" autocomplete="new-password" required id="id_new_password1">
+                            {% if password_form.new_password1.errors %}
+                            <div class="text-danger mt-2">
+                                {% for error in password_form.new_password1.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if password_form.new_password1.help_text %}
+                            <div class="form-text text-muted mt-2">
+                                <small>{{ password_form.new_password1.help_text|safe }}</small>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label for="id_new_password2" class="form-label">Confirm New Password</label>
+                            <input type="password" name="new_password2" class="form-control" autocomplete="new-password" required id="id_new_password2">
+                            {% if password_form.new_password2.errors %}
+                            <div class="text-danger mt-2">
+                                {% for error in password_form.new_password2.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Change Password</button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

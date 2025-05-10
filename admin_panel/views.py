@@ -22,12 +22,100 @@ from notifications.email_utils import (
     notify_user_investment_completed,
     notify_user_bonus
 )
+from django.contrib.auth import logout
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+
+@login_required
+def admin_logout(request):
+    """Admin logout view"""
+    logout(request)
+    return redirect('admin_login')
+
+
 
 User = get_user_model()
+
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+
+def is_admin(user):
+    if user.is_superuser or user.is_staff:
+        return True
+    raise PermissionDenied("You don't have permission to access this page.")
 
 # Helper function to check if user is admin
 def is_admin(user):
     return user.is_staff
+
+def admin_login(request):
+    """Admin login view"""
+    # Redirect to dashboard if already logged in as admin
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect('admin_dashboard')
+        
+    error_message = None
+    
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        user = authenticate(request, username=email, password=password)
+        
+        if user is not None and user.is_staff:
+            login(request, user)
+            return redirect('admin_dashboard')
+        else:
+            error_message = 'Invalid credentials or insufficient permissions'
+    
+    return render(request, 'admin_panel/login.html', {'error_message': error_message})
+
+@login_required
+@user_passes_test(is_admin)
+def admin_profile(request):
+    """Admin profile view with password change functionality"""
+    if request.method == 'POST':
+        password_form = PasswordChangeForm(request.user, request.POST)
+        if password_form.is_valid():
+            user = password_form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('admin_profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        password_form = PasswordChangeForm(request.user)
+    
+    return render(request, 'admin_panel/profile.html', {
+        'password_form': password_form,
+        'user': request.user
+    })
+
+
+@login_required
+@user_passes_test(is_admin)
+def change_password(request):
+    """Admin change password view"""
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Update the session to prevent the user from being logged out
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('admin_dashboard')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = PasswordChangeForm(request.user)
+    
+    return render(request, 'admin_panel/change_password.html', {
+        'form': form
+    })
+
+
+
 
 @login_required
 @user_passes_test(is_admin)
@@ -768,11 +856,64 @@ def manage_users(request):
 @login_required
 @user_passes_test(is_admin)
 def pending_kyc(request):
-    """View for pending KYC verifications"""
-    pending_kyc = KYC.objects.filter(status='pending')
+    """View for managing KYC verifications with tabs for pending and approved"""
+    active_tab = request.GET.get('tab', 'pending')
+    search_query = request.GET.get('search', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    
+    # Base queryset
+    if active_tab == 'approved':
+        kyc_queryset = KYC.objects.filter(status='approved').order_by('-updated_at')
+    else:  # Default to pending
+        kyc_queryset = KYC.objects.filter(status='pending').order_by('-created_at')
+    
+    # Apply search filter if provided
+    if search_query:
+        kyc_queryset = kyc_queryset.filter(
+            Q(user__email__icontains=search_query) |
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query)
+        )
+    
+    # Apply date filters if provided
+    if date_from:
+        date_from_obj = datetime.strptime(date_from, '%Y-%m-%d').date()
+        if active_tab == 'approved':
+            kyc_queryset = kyc_queryset.filter(updated_at__date__gte=date_from_obj)
+        else:
+            kyc_queryset = kyc_queryset.filter(created_at__date__gte=date_from_obj)
+    
+    if date_to:
+        date_to_obj = datetime.strptime(date_to, '%Y-%m-%d').date()
+        if active_tab == 'approved':
+            kyc_queryset = kyc_queryset.filter(updated_at__date__lte=date_to_obj)
+        else:
+            kyc_queryset = kyc_queryset.filter(created_at__date__lte=date_to_obj)
+    
+    # Get counts for tabs
+    pending_count = KYC.objects.filter(status='pending').count()
+    approved_count = KYC.objects.filter(status='approved').count()
+    
+    # Pagination
+    page = request.GET.get('page', 1)
+    paginator = Paginator(kyc_queryset, 10)  # Show 10 KYC verifications per page
+    
+    try:
+        kyc_list = paginator.page(page)
+    except PageNotAnInteger:
+        kyc_list = paginator.page(1)
+    except EmptyPage:
+        kyc_list = paginator.page(paginator.num_pages)
     
     context = {
-        'pending_kyc': pending_kyc
+        'kyc_list': kyc_list,
+        'active_tab': active_tab,
+        'search_query': search_query,
+        'date_from': date_from,
+        'date_to': date_to,
+        'pending_count': pending_count,
+        'approved_count': approved_count,
     }
     
     return render(request, 'admin_panel/pending_kyc.html', context)
@@ -858,17 +999,27 @@ def reject_kyc(request, kyc_id):
     
     return render(request, 'admin_panel/reject_kyc.html', context)
 
+# Fix for the investment_plans view
+# Make sure to import Sum from django.db.models
+
+
+
 @login_required
 @user_passes_test(is_admin)
 def investment_plans(request):
     """View for managing investment plans"""
     plans = InvestmentPlan.objects.all()
     
+    # Get the system settings
+    system_settings = SystemSettings.get_settings()
+    
     context = {
-        'plans': plans
+        'plans': plans,
+        'system_settings': system_settings,
     }
     
     return render(request, 'admin_panel/investment_plans.html', context)
+
 
 @login_required
 @user_passes_test(is_admin)

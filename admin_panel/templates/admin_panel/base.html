@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Google Fonts - Nunito -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -67,85 +67,172 @@
                             600: '#0284c7',
                         },
                     },
+                    boxShadow: {
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    },
                 },
             },
         }
     </script>
     
+    <style>
+        /* Smooth transitions */
+        .transition-all {
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 200ms;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Sidebar animation */
+        .sidebar-collapsed {
+            width: 5rem !important;
+        }
+        .sidebar-collapsed span {
+            display: none !important;
+        }
+        .sidebar-collapsed .logo-text {
+            display: none !important;
+        }
+        .sidebar-collapsed .logo-icon {
+            display: block !important;
+        }
+    </style>
+    
     {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-50 font-sans antialiased">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <div id="sidebar" class="bg-secondary-800 text-white w-64 min-h-screen flex-shrink-0 transition-all duration-300 ease-in-out">
-            <div class="flex items-center justify-center h-16 border-b border-secondary-700">
-                <h1 class="text-xl font-bold">{{ system_settings.site_name }}</h1>
+        <div id="sidebar" class="bg-gray-900 text-white w-64 min-h-screen flex-shrink-0 transition-all duration-300 ease-in-out flex flex-col">
+            <div class="flex items-center justify-between h-16 px-4 border-b border-gray-800">
+                <div class="flex items-center space-x-2">
+                    <div class="logo-icon hidden">
+                        <i class="fas fa-coin text-xl text-primary-400"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-white logo-text">{{ system_settings.site_name }}</h1>
+                </div>
             </div>
             
-            <div class="py-4 px-3">
-                <ul class="space-y-2">
+            <div class="flex-1 overflow-y-auto py-4 px-3">
+                <ul class="space-y-1">
                     <li>
-                        <a href="{% url 'admin_dashboard' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-secondary-700{% endif %}">
-                            <i class="fas fa-tachometer-alt w-6"></i>
-                            <span>Dashboard</span>
+                        <a href="{% url 'admin_dashboard' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-tachometer-alt w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'admin_dashboard' %}text-primary-400{% endif %}"></i>
+                            <span class="ml-3">Dashboard</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'manage_users' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'manage_users' %}bg-secondary-700{% endif %}">
-                            <i class="fas fa-users w-6"></i>
-                            <span>Users</span>
+                        <a href="{% url 'manage_users' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'manage_users' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-users w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'manage_users' %}text-primary-400{% endif %}"></i>
+                            <span class="ml-3">Users</span>
+                            {% with pending_count=pending_users|default:0 %}
+                            {% if pending_count > 0 %}
+                            <span class="ml-auto bg-red-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">{{ pending_count }}</span>
+                            {% endif %}
+                            {% endwith %}
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'pending_kyc' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'pending_kyc' %}bg-secondary-700{% endif %}">
-                            <i class="fas fa-id-card w-6"></i>
-                            <span>KYC Verification</span>
+                        <a href="{% url 'pending_kyc' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'pending_kyc' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-id-card w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'pending_kyc' %}text-primary-400{% endif %}"></i>
+                            <span class="ml-3">KYC Verification</span>
+                            {% with kyc_count=pending_kyc|default:0 %}
+                            {% if kyc_count > 0 %}
+                            <span class="ml-auto bg-yellow-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">{{ kyc_count }}</span>
+                            {% endif %}
+                            {% endwith %}
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'admin_investment_plans' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'investment_plans' %}bg-secondary-700{% endif %}">
-                            <i class="fas fa-chart-line w-6"></i>
-                            <span>Manager Investment Plans</span>
+                        <a href="{% url 'admin_investment_plans' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'admin_investment_plans' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-chart-line w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'admin_investment_plans' %}text-primary-400{% endif %}"></i>
+                            <span class="ml-3">Investment Plans</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'admin_investments' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'investment_plans' %}bg-secondary-700{% endif %}">
-                            <i class="fas fa-piggy-bank w-6"></i>
-                            <span>Manage Investments</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{% url 'pending_deposits' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'pending_deposits' %}bg-secondary-700{% endif %}">
-                            <i class="fas fa-money-bill-wave w-6"></i>
-                            <span>Deposits</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'pending_withdrawals' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'pending_withdrawals' %}bg-secondary-700{% endif %}">
-                            <i class="fas fa-hand-holding-usd w-6"></i>
-                            <span>Withdrawals</span>
+                        <a href="{% url 'admin_investments' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'admin_investments' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-piggy-bank w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'admin_investments' %}text-primary-400{% endif %}"></i>
+                            <span class="ml-3">Investments</span>
+                            {% with active_count=active_investments|default:0 %}
+                            {% if active_count > 0 %}
+                            <span class="ml-auto bg-blue-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">{{ active_count }}</span>
+                            {% endif %}
+                            {% endwith %}
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'payment_methods' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'system_settings' %}bg-secondary-700{% endif %}">
-                            <i class="fas fa-cog w-6"></i>
-                            <span>Manage Users Bank/Cards</span>
+                        <a href="{% url 'pending_deposits' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'pending_deposits' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-money-bill-wave w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'pending_deposits' %}text-primary-400{% endif %}"></i>
+                            <span class="ml-3">Deposits</span>
+                            {% with deposit_count=pending_deposits|default:0 %}
+                            {% if deposit_count > 0 %}
+                            <span class="ml-auto bg-green-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">{{ deposit_count }}</span>
+                            {% endif %}
+                            {% endwith %}
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'reports' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'reports' %}bg-secondary-700{% endif %}">
-                            <i class="fas fa-file-alt w-6"></i>
-                            <span>Reports</span>
+                        <a href="{% url 'pending_withdrawals' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'pending_withdrawals' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-hand-holding-usd w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'pending_withdrawals' %}text-primary-400{% endif %}"></i>
+                            <span class="ml-3">Withdrawals</span>
+                            {% with withdrawal_count=pending_withdrawals|default:0 %}
+                            {% if withdrawal_count > 0 %}
+                            <span class="ml-auto bg-red-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">{{ withdrawal_count }}</span>
+                            {% endif %}
+                            {% endwith %}
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'system_settings' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'system_settings' %}bg-secondary-700{% endif %}">
-                            <i class="fas fa-cog w-6"></i>
-                            <span>Settings</span>
+                        <a href="{% url 'payment_methods' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'payment_methods' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-credit-card w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'payment_methods' %}text-primary-400{% endif %}"></i>
+                            <span class="ml-3">Payment Methods</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'reports' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'reports' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-file-alt w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'reports' %}text-primary-400{% endif %}"></i>
+                            <span class="ml-3">Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'system_settings' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'system_settings' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-cog w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'system_settings' %}text-primary-400{% endif %}"></i>
+                            <span class="ml-3">Settings</span>
                         </a>
                     </li>
                 </ul>
+            </div>
+            
+            <!-- Sidebar footer -->
+            <div class="p-4 border-t border-gray-800">
+                <div class="flex items-center">
+                    {% if request.user.profile.avatar %}
+                    <img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.get_full_name }}" class="w-10 h-10 rounded-full object-cover">
+                    {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|urlencode }}&background=0D8ABC&color=fff" alt="{{ request.user.get_full_name }}" class="w-10 h-10 rounded-full">
+                    {% endif %}
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-white">{{ request.user.get_full_name|default:request.user.email }}</p>
+                        <p class="text-xs text-gray-400">{% if request.user.is_superuser %}Super Admin{% else %}Admin{% endif %}</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -154,42 +241,197 @@
             <!-- Top Navigation -->
             <header class="bg-white shadow-sm z-10">
                 <div class="flex items-center justify-between h-16 px-6">
-                    <!-- Toggle Sidebar Button -->
-                    <button id="sidebarToggle" class="text-secondary-500 hover:text-secondary-700">
-                        <i class="fas fa-bars"></i>
-                    </button>
+                    <!-- Left side - Toggle and Breadcrumbs -->
+                    <div class="flex items-center space-x-4">
+                        <button id="sidebarToggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        
+                        <!-- Breadcrumbs -->
+                        <nav class="flex" aria-label="Breadcrumb">
+                            <ol class="inline-flex items-center space-x-1 md:space-x-2">
+                                <li class="inline-flex items-center">
+                                    <a href="{% url 'admin_dashboard' %}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700">
+                                        <i class="fas fa-home mr-2"></i>
+                                        Dashboard
+                                    </a>
+                                </li>
+                                <li>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                                        <span class="ml-1 text-sm font-medium text-gray-700 md:ml-2">{% block breadcrumb %}Dashboard{% endblock %}</span>
+                                    </div>
+                                </li>
+                            </ol>
+                        </nav>
+                    </div>
                     
                     <!-- Right Side Nav Items -->
                     <div class="flex items-center space-x-4">
-                        <!-- Notifications -->
-                        <div class="relative">
-                            <button class="text-secondary-500 hover:text-secondary-700 relative">
+                        <!-- Search -->
+                        <div class="relative hidden md:block">
+                            <form method="get" action="{% url 'manage_users' %}">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                                <input type="text" name="search" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2" placeholder="Search users...">
+                            </form>
+                        </div>
+                        
+                        <!-- Pending Actions Dropdown -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="text-gray-500 hover:text-gray-700 relative focus:outline-none">
                                 <i class="fas fa-bell"></i>
-                                <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">3</span>
+                                {% with total_pending=pending_deposits|add:pending_withdrawals|add:pending_kyc|add:pending_users|default:0 %}
+                                {% if total_pending > 0 %}
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">{{ total_pending }}</span>
+                                {% endif %}
+                                {% endwith %}
                             </button>
+                            
+                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg overflow-hidden z-50 border border-gray-200">
+                                <div class="px-4 py-2 bg-gray-50 border-b border-gray-200">
+                                    <h3 class="text-sm font-medium text-gray-700">Pending Actions</h3>
+                                </div>
+                                <div class="divide-y divide-gray-200 max-h-60 overflow-y-auto">
+                                    {% if pending_users > 0 %}
+                                    <a href="{% url 'pending_approvals' %}" class="block px-4 py-3 hover:bg-gray-50">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 bg-yellow-100 p-2 rounded-full">
+                                                <i class="fas fa-user-plus text-yellow-500"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">Pending User Approvals</p>
+                                                <p class="text-xs text-gray-500">{{ pending_users }} users waiting for approval</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% if pending_deposits > 0 %}
+                                    <a href="{% url 'pending_deposits' %}" class="block px-4 py-3 hover:bg-gray-50">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 bg-green-100 p-2 rounded-full">
+                                                <i class="fas fa-money-bill-wave text-green-500"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">Pending Deposits</p>
+                                                <p class="text-xs text-gray-500">{{ pending_deposits }} deposits waiting for approval</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% if pending_withdrawals > 0 %}
+                                    <a href="{% url 'pending_withdrawals' %}" class="block px-4 py-3 hover:bg-gray-50">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 bg-red-100 p-2 rounded-full">
+                                                <i class="fas fa-hand-holding-usd text-red-500"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">Pending Withdrawals</p>
+                                                <p class="text-xs text-gray-500">{{ pending_withdrawals }} withdrawals waiting for approval</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% if pending_kyc > 0 %}
+                                    <a href="{% url 'pending_kyc' %}" class="block px-4 py-3 hover:bg-gray-50">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 bg-blue-100 p-2 rounded-full">
+                                                <i class="fas fa-id-card text-blue-500"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">Pending KYC Verifications</p>
+                                                <p class="text-xs text-gray-500">{{ pending_kyc }} KYC documents waiting for review</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% with total_pending=pending_deposits|add:pending_withdrawals|add:pending_kyc|add:pending_users|default:0 %}
+                                    {% if total_pending == 0 %}
+                                    <div class="block px-4 py-3">
+                                        <p class="text-sm text-gray-500 text-center">No pending actions</p>
+                                    </div>
+                                    {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- User Dropdown -->
                         <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" class="flex items-center space-x-2 text-secondary-700 hover:text-secondary-900">
-                                <img src="https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff" alt="Admin" class="w-8 h-8 rounded-full">
-                                <span>Admin</span>
-                                <i class="fas fa-chevron-down text-xs"></i>
+                            <button @click="open = !open" class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 focus:outline-none">
+                                {% if request.user.profile.avatar %}
+                                <img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.get_full_name }}" class="w-8 h-8 rounded-full object-cover">
+                                {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|urlencode }}&background=0D8ABC&color=fff" alt="{{ request.user.get_full_name }}" class="w-8 h-8 rounded-full">
+                                {% endif %}
+                                <span class="hidden md:inline">{{ request.user.get_full_name|default:request.user.email }}</span>
+                                <i class="fas fa-chevron-down text-xs hidden md:inline"></i>
                             </button>
                             
-                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                <a href="#" class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100">Profile</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100">Settings</a>
+                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                                <a href="{% url 'admin_profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user mr-2 text-gray-500"></i> Profile
+                                </a>
+                                <a href="{% url 'admin_change_password' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-key mr-2 text-gray-500"></i> Change Password
+                                </a>
+                                <a href="{% url 'system_settings' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-cog mr-2 text-gray-500"></i> Settings
+                                </a>
                                 <div class="border-t border-gray-200"></div>
-                                <a href="#" class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100">Logout</a>
+                                <a href="{% url 'admin_logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-sign-out-alt mr-2 text-gray-500"></i> Logout
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
             </header>
             
+            <!-- Alert Messages -->
+            <div id="alertContainer" class="fixed top-20 right-4 z-50 space-y-2 w-80">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500{% elif message.tags == 'warning' %}bg-yellow-50 border-l-4 border-yellow-500{% else %}bg-blue-50 border-l-4 border-blue-500{% endif %} p-4 shadow-md">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    {% if message.tags == 'success' %}
+                                        <i class="fas fa-check-circle text-green-500"></i>
+                                    {% elif message.tags == 'error' %}
+                                        <i class="fas fa-exclamation-circle text-red-500"></i>
+                                    {% elif message.tags == 'warning' %}
+                                        <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+                                    {% else %}
+                                        <i class="fas fa-info-circle text-blue-500"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium {% if message.tags == 'success' %}text-green-800{% elif message.tags == 'error' %}text-red-800{% elif message.tags == 'warning' %}text-yellow-800{% else %}text-blue-800{% endif %}">{{ message }}</p>
+                                </div>
+                                <div class="ml-auto pl-3">
+                                    <button class="{% if message.tags == 'success' %}text-green-500 hover:text-green-700{% elif message.tags == 'error' %}text-red-500 hover:text-red-700{% elif message.tags == 'warning' %}text-yellow-500 hover:text-yellow-700{% else %}text-blue-500 hover:text-blue-700{% endif %}" onclick="this.parentElement.parentElement.parentElement.classList.add('hidden')">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
             <!-- Main Content Area -->
-            <main class="flex-1 overflow-y-auto p-6">
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <!-- Page Header -->
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">{% block page_title %}Dashboard{% endblock %}</h2>
+                    <p class="text-gray-600 mt-1">{% block page_subtitle %}Welcome back, {{ request.user.get_full_name|default:request.user.email }}{% endblock %}</p>
+                </div>
+                
                 {% block content %}{% endblock %}
             </main>
         </div>
@@ -202,15 +444,82 @@
     <script>
         document.getElementById('sidebarToggle').addEventListener('click', function() {
             const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('w-64');
-            sidebar.classList.toggle('w-16');
-            
-            // Toggle text visibility
-            const sidebarTexts = sidebar.querySelectorAll('span');
-            sidebarTexts.forEach(text => {
-                text.classList.toggle('hidden');
+            sidebar.classList.toggle('sidebar-collapsed');
+        });
+        
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('#alertContainer > div');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    alert.classList.add('hidden');
+                }, 5000);
             });
         });
+    </script>
+    
+    <!-- Alert Functions -->
+    <script>
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            
+            let iconClass, bgClass, textClass, borderClass;
+            
+            switch(type) {
+                case 'success':
+                    iconClass = 'fas fa-check-circle text-green-500';
+                    bgClass = 'bg-green-50';
+                    textClass = 'text-green-800';
+                    borderClass = 'border-green-500';
+                    break;
+                case 'error':
+                    iconClass = 'fas fa-exclamation-circle text-red-500';
+                    bgClass = 'bg-red-50';
+                    textClass = 'text-red-800';
+                    borderClass = 'border-red-500';
+                    break;
+                case 'warning':
+                    iconClass = 'fas fa-exclamation-triangle text-yellow-500';
+                    bgClass = 'bg-yellow-50';
+                    textClass = 'text-yellow-800';
+                    borderClass = 'border-yellow-500';
+                    break;
+                default:
+                    iconClass = 'fas fa-info-circle text-blue-500';
+                    bgClass = 'bg-blue-50';
+                    textClass = 'text-blue-800';
+                    borderClass = 'border-blue-500';
+            }
+            
+            const alertHtml = `
+                <div class="${bgClass} border-l-4 ${borderClass} p-4 shadow-md">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium ${textClass}">${message}</p>
+                        </div>
+                        <div class="ml-auto pl-3">
+                            <button class="${iconClass.replace('fas fa-check-circle', '').replace('fas fa-exclamation-circle', '').replace('fas fa-exclamation-triangle', '').replace('fas fa-info-circle', '')}" onclick="this.parentElement.parentElement.parentElement.classList.add('hidden')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Insert the alert at the beginning of the container
+            alertContainer.insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // Get the newly added alert
+            const newAlert = alertContainer.firstElementChild;
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                newAlert.classList.add('hidden');
+            }, 5000);
+        }
     </script>
     
     {% block extra_js %}{% endblock %}

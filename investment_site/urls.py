@@ -4,6 +4,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # Add this to your urlpatterns if you want a cleaner URL for admin login
+    path('admin-login/', include('admin_panel.urls')),
     path('admin/', admin.site.urls),
     path('', include('accounts.urls')),
     path('dashboard/', include('dashboard.urls')),

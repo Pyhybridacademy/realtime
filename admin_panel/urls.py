@@ -43,6 +43,13 @@ urlpatterns = [
     
     # System settings
     path('settings/', views.system_settings, name='system_settings'),
+    # Add this to your existing urlpatterns
+    path('login/', views.admin_login, name='admin_login'),
+    path('logout/', views.admin_logout, name='admin_logout'),
+    path('change-password/', views.change_password, name='admin_change_password'),
+    path('profile/', views.admin_profile, name='admin_profile'),
+
+
 
     path('payment-methods/', views.payment_methods, name='payment_methods'),
     path('payment-methods/delete/<int:method_id>/', views.delete_payment_method, name='delete_payment_method'),
