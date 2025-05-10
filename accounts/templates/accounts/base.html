@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ system_settings.site_name }} - Your Partner in Financial Success{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#00D68F',
+                        secondary: '#0F172A',
+                        darkBg: '#0A0E17',
+                        lightGray: '#F8FAFC',
+                    },
+                    boxShadow: {
+                        'custom': '0 4px 20px rgba(0, 0, 0, 0.08)',
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-slow': 'float 8s ease-in-out infinite',
+                        'float-reverse': 'float-reverse 7s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'hero-move': 'hero-move 10s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        'float-reverse': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(20px)' },
+                        },
+                        'hero-move': {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '50%': { transform: 'translateX(15px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-white">
+    <!-- Header/Navigation -->
+    <header class="sticky top-0 z-50 bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <a href="#" class="flex items-center">
+                    <div class="text-3xl font-bold">
+                        <span class="flex items-center">
+                            <svg class="w-10 h-10 text-secondary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 2L12 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M19.7942 7L4.20577 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M21.5 12L2.5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M19.7942 17L4.20577 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="ml-2 text-secondary">{{ system_settings.site_name }}</span>
+                        </span>
+                    </div>
+                </a>
+                
+                <!-- Navigation -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="{% url 'markets' %}" class="text-gray-700 hover:text-primary font-medium transition-colors duration-300">Markets</a>
+                    <a href="{% url 'about_us' %}" class="text-gray-700 hover:text-primary font-medium transition-colors duration-300">About Us</a>
+                    <a href="{% url 'insights' %}" class="text-gray-700 hover:text-primary font-medium transition-colors duration-300">Insights</a>
+                    <a href="{% url 'plans' %}" class="text-gray-700 hover:text-primary font-medium transition-colors duration-300">Plans</a>
+                    <a href="{% url 'contact_us' %}" class="text-gray-700 hover:text-primary font-medium transition-colors duration-300">Contact Us</a>
+                </nav>
+                
+                <!-- Language & Auth Buttons -->
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex items-center">
+                        <button class="flex items-center text-gray-700 hover:text-primary transition-colors duration-300">
+                            <img src="https://flagcdn.com/w20/gb.png" alt="English" class="w-5 h-5 mr-2">
+                            <span>English</span>
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="hidden md:block text-gray-700 hover:text-primary font-medium transition-colors duration-300">Dashboard</a>
+                        <a href="{% url 'logout' %}" class="hidden md:block text-gray-700 hover:text-primary font-medium transition-colors duration-300">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="hidden md:block text-gray-700 hover:text-primary font-medium transition-colors duration-300">Login</a>
+                        <a href="{% url 'register_step1' %}" class="bg-primary text-white px-6 py-2 rounded-md font-medium hover:bg-opacity-90 transition-all pulse-btn">Join Now</a>
+                    {% endif %}
+                    
+                    <button class="md:hidden text-gray-700" id="mobileMenuBtn">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu (hidden by default) -->
+            <div id="mobileMenu" class="hidden md:hidden mt-4 bg-white rounded-lg shadow-lg p-4">
+                <nav class="flex flex-col space-y-4">
+                    <a href="{% url 'markets' %}" class="text-gray-700 hover:text-primary font-medium">Markets</a>
+                    <a href="{% url 'about_us' %}" class="text-gray-700 hover:text-primary font-medium">About Us</a>
+                    <a href="{% url 'insights' %}" class="text-gray-700 hover:text-primary font-medium">Insights</a>
+                    <a href="{% url 'plans' %}" class="text-gray-700 hover:text-primary font-medium">Plans</a>
+                    <a href="{% url 'contact_us' %}" class="text-gray-700 hover:text-primary font-medium">Contact Us</a>
+                    
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-primary font-medium">Dashboard</a>
+                        <a href="{% url 'logout' %}" class="text-gray-700 hover:text-primary font-medium">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary font-medium">Login</a>
+                        <a href="{% url 'register_step1' %}" class="text-gray-700 hover:text-primary font-medium">Join Now</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-darkBg text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-2xl font-bold mb-6">
+                        <span class="flex items-center">
+                            <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 2L12 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M19.7942 7L4.20577 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M21.5 12L2.5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M19.7942 17L4.20577 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="ml-2">{{ system_settings.site_name }}</span>
+                        </span>
+                    </div>
+                    <p class="text-gray-400 mb-6">{{ system_settings.site_name }}- Your Partner in Financial Success. Trade with Confidence, Explore Opportunities, and Grow Your Wealth.</p>
+                    
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300 transform hover:scale-110">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300 transform hover:scale-110">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300 transform hover:scale-110">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300 transform hover:scale-110">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Quick links</h3>
+                    <ul class="space-y-4">
+                        <li><a href="{% url 'about_us' %}" class="text-gray-400 hover:text-primary">About Us</a></li>
+                        <li><a href="{% url 'insights' %}" class="text-gray-400 hover:text-primary">Insights</a></li>
+                        <li><a href="{% url 'markets' %}" class="text-gray-400 hover:text-primary">Markets</a></li>
+                        <li><a href="{% url 'plans' %}" class="text-gray-400 hover:text-primary">Plans</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Services -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Services</h3>
+                    <ul class="space-y-4">
+                        <li><a href="#" class="text-gray-400 hover:text-primary">Copy Trading</a></li>
+                        <li><a href="{% url 'professional_tools' %}" class="text-gray-400 hover:text-primary">Professional Tools</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary">Diverse Asset</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Support -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Support</h3>
+                    <ul class="space-y-4">
+                        <li><a href="#" class="text-gray-400 hover:text-primary">Terms & Conditions</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary">Privacy Policy</a></li>
+                        <li><a href="{% url 'faqs' %}" class="text-gray-400 hover:text-primary">FAQs</a></li>
+                        <li><a href="{% url 'contact_us' %}" class="text-gray-400 hover:text-primary">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                <p>Trading financial instruments with margin carries a high level of risk, which can work both in your favor and against you. It may result in the partial or total loss of your investment (deposit). It is essential to refrain from investing money that you cannot afford to lose. If you harbor any uncertainties, it is advisable to seek guidance from an independent and appropriately licensed financial advisor. Additionally, ensure that you allocate sufficient time to actively manage your investments.</p>
+                <p class="mt-4">&copy; 2025 {{ system_settings.site_name }}. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Dark Mode Toggle -->
+    <div class="dark-mode-toggle">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+        </svg>
+    </div>
+
+    <script src="{% static 'js/animations.js' %}"></script>
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+    // Initialize AOS
+    AOS.init({
+        duration: 800,
+        once: true
+    });
+    
+    // Note: Mobile menu toggle and dark mode toggle are now handled in animations.js
+</script>
+{% block extra_js %}{% endblock %}</body>
+</html>

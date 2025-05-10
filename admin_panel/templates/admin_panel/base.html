@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ system_settings.site_name }}{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts - Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        success: {
+                            500: '#10b981',
+                            600: '#059669',
+                        },
+                        danger: {
+                            500: '#ef4444',
+                            600: '#dc2626',
+                        },
+                        warning: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        },
+                        info: {
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div id="sidebar" class="bg-secondary-800 text-white w-64 min-h-screen flex-shrink-0 transition-all duration-300 ease-in-out">
+            <div class="flex items-center justify-center h-16 border-b border-secondary-700">
+                <h1 class="text-xl font-bold">{{ system_settings.site_name }}</h1>
+            </div>
+            
+            <div class="py-4 px-3">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'admin_dashboard' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-secondary-700{% endif %}">
+                            <i class="fas fa-tachometer-alt w-6"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'manage_users' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'manage_users' %}bg-secondary-700{% endif %}">
+                            <i class="fas fa-users w-6"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'pending_kyc' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'pending_kyc' %}bg-secondary-700{% endif %}">
+                            <i class="fas fa-id-card w-6"></i>
+                            <span>KYC Verification</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'admin_investment_plans' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'investment_plans' %}bg-secondary-700{% endif %}">
+                            <i class="fas fa-chart-line w-6"></i>
+                            <span>Manager Investment Plans</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'admin_investments' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'investment_plans' %}bg-secondary-700{% endif %}">
+                            <i class="fas fa-piggy-bank w-6"></i>
+                            <span>Manage Investments</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'pending_deposits' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'pending_deposits' %}bg-secondary-700{% endif %}">
+                            <i class="fas fa-money-bill-wave w-6"></i>
+                            <span>Deposits</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'pending_withdrawals' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'pending_withdrawals' %}bg-secondary-700{% endif %}">
+                            <i class="fas fa-hand-holding-usd w-6"></i>
+                            <span>Withdrawals</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'payment_methods' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'system_settings' %}bg-secondary-700{% endif %}">
+                            <i class="fas fa-cog w-6"></i>
+                            <span>Manage Users Bank/Cards</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'reports' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'reports' %}bg-secondary-700{% endif %}">
+                            <i class="fas fa-file-alt w-6"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'system_settings' %}" class="flex items-center p-2 text-white rounded-lg hover:bg-secondary-700 {% if request.resolver_match.url_name == 'system_settings' %}bg-secondary-700{% endif %}">
+                            <i class="fas fa-cog w-6"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="flex items-center justify-between h-16 px-6">
+                    <!-- Toggle Sidebar Button -->
+                    <button id="sidebarToggle" class="text-secondary-500 hover:text-secondary-700">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <!-- Right Side Nav Items -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Notifications -->
+                        <div class="relative">
+                            <button class="text-secondary-500 hover:text-secondary-700 relative">
+                                <i class="fas fa-bell"></i>
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">3</span>
+                            </button>
+                        </div>
+                        
+                        <!-- User Dropdown -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center space-x-2 text-secondary-700 hover:text-secondary-900">
+                                <img src="https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff" alt="Admin" class="w-8 h-8 rounded-full">
+                                <span>Admin</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            
+                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                <a href="#" class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100">Profile</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100">Settings</a>
+                                <div class="border-t border-gray-200"></div>
+                                <a href="#" class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-6">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    
+    <!-- Alpine.js for dropdowns -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- Sidebar Toggle Script -->
+    <script>
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('w-64');
+            sidebar.classList.toggle('w-16');
+            
+            // Toggle text visibility
+            const sidebarTexts = sidebar.querySelectorAll('span');
+            sidebarTexts.forEach(text => {
+                text.classList.toggle('hidden');
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

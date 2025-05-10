@@ -1,0 +1,132 @@
+{% extends 'dash_base.html' %}
+{% load static %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="flex-1 p-4 md:p-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Notifications</h1>
+            <form method="POST" action="{% url 'mark_all_read' %}">
+                {% csrf_token %}
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-cardBg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    Mark All as Read
+                </button>
+            </form>
+        </div>
+        
+        <div class="bg-white dark:bg-cardBg shadow overflow-hidden sm:rounded-lg">
+            <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                {% for notification in notifications %}
+                <li class="{% if not notification.is_read %}bg-blue-50 dark:bg-blue-900/20{% endif %}">
+                    <div class="px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full 
+                                    {% if notification.notification_type == 'deposit' %}bg-green-100 dark:bg-green-900/30{% elif notification.notification_type == 'withdrawal' %}bg-red-100 dark:bg-red-900/30{% elif notification.notification_type == 'approval' %}bg-blue-100 dark:bg-blue-900/30{% elif notification.notification_type == 'kyc' %}bg-yellow-100 dark:bg-yellow-900/30{% elif notification.notification_type == 'bonus' %}bg-purple-100 dark:bg-purple-900/30{% else %}bg-gray-100 dark:bg-gray-700{% endif %}">
+                                    {% if notification.notification_type == 'deposit' %}
+                                    <svg class="h-6 w-6 text-green-600 dark:text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    {% elif notification.notification_type == 'withdrawal' %}
+                                    <svg class="h-6 w-6 text-red-600 dark:text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                    </svg>
+                                    {% elif notification.notification_type == 'approval' %}
+                                    <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {% elif notification.notification_type == 'kyc' %}
+                                    <svg class="h-6 w-6 text-yellow-600 dark:text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                    </svg>
+                                    {% elif notification.notification_type == 'bonus' %}
+                                    <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {% else %}
+                                    <svg class="h-6 w-6 text-gray-600 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ notification.title }}
+                                    </div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ notification.message }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ml-2 flex-shrink-0 flex">
+                                <div class="flex flex-col items-end">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ notification.created_at|date:"M d, Y" }} at {{ notification.created_at|date:"H:i" }}
+                                    </div>
+                                    {% if not notification.is_read %}
+                                    <form method="POST" action="{% url 'mark_read' notification.id %}" class="mt-1">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300">
+                                            Mark as Read
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li>
+                    <div class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <p class="mt-4 text-sm font-medium text-gray-900 dark:text-white">No notifications to display</p>
+                        <p class="mt-1 text-sm">You're all caught up!</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        {% if notifications.has_other_pages %}
+        <div class="mt-4 flex items-center justify-center">
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                {% if notifications.has_previous %}
+                <a href="?page={{ notifications.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-cardBg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <span class="sr-only">Previous</span>
+                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+                {% endif %}
+                
+                {% for i in notifications.paginator.page_range %}
+                    {% if notifications.number == i %}
+                    <span class="relative inline-flex items-center px-4 py-2 border border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-sm font-medium text-primary-600 dark:text-primary-400">
+                        {{ i }}
+                    </span>
+                    {% else %}
+                    <a href="?page={{ i }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-cardBg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        {{ i }}
+                    </a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if notifications.has_next %}
+                <a href="?page={{ notifications.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-cardBg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <span class="sr-only">Next</span>
+                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

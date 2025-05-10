@@ -1,0 +1,276 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}Insights - {{ system_settings.site_name }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-16 bg-gray-50 dark:bg-darkBg">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-secondary dark:text-white mb-6">Market <span class="text-primary">Insights</span></h1>
+            <p class="text-gray-600 dark:text-gray-300 text-lg mb-8">Stay informed with the latest market analysis, trading strategies, and financial news.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Articles -->
+<section class="py-16 bg-white dark:bg-gray-900">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-secondary dark:text-white mb-8">Featured <span class="text-primary">Articles</span></h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Featured Article 1 -->
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden shadow-custom" data-aos="fade-up">
+                <img src="/placeholder.svg?height=300&width=600" alt="Cryptocurrency Market Trends" class="w-full h-64 object-cover">
+                <div class="p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs px-3 py-1 rounded-full">Cryptocurrency</span>
+                        <span class="text-gray-500 dark:text-gray-400 text-sm ml-3">May 8, 2025</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-secondary dark:text-white mb-3">Bitcoin's Surge: Understanding the Current Bull Run</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">An in-depth analysis of the factors driving Bitcoin's recent price surge and what it means for the broader cryptocurrency market.</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <img src="/placeholder.svg?height=50&width=50" alt="Author" class="w-10 h-10 rounded-full mr-3">
+                            <span class="text-gray-700 dark:text-gray-200 font-medium">Alex Thompson</span>
+                        </div>
+                        <a href="#" class="text-primary hover:underline font-medium">Read More →</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Featured Article 2 -->
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden shadow-custom" data-aos="fade-up" data-aos-delay="100">
+                <img src="/placeholder.svg?height=300&width=600" alt="Forex Trading Strategies" class="w-full h-64 object-cover">
+                <div class="p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs px-3 py-1 rounded-full">Forex</span>
+                        <span class="text-gray-500 dark:text-gray-400 text-sm ml-3">May 5, 2025</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-secondary dark:text-white mb-3">5 Effective Risk Management Strategies for Forex Traders</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">Discover proven risk management techniques that can help protect your capital and improve your long-term trading performance.</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <img src="/placeholder.svg?height=50&width=50" alt="Author" class="w-10 h-10 rounded-full mr-3">
+                            <span class="text-gray-700 dark:text-gray-200 font-medium">Sarah Johnson</span>
+                        </div>
+                        <a href="#" class="text-primary hover:underline font-medium">Read More →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Latest Articles -->
+<section class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-bold text-secondary dark:text-white">Latest <span class="text-primary">Articles</span></h2>
+            <div class="flex space-x-2">
+                <button class="px-4 py-2 bg-white dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">All</button>
+                <button class="px-4 py-2 bg-white dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">Crypto</button>
+                <button class="px-4 py-2 bg-white dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">Forex</button>
+                <button class="px-4 py-2 bg-white dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">Stocks</button>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Article 1 -->
+            <div class="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-custom" data-aos="fade-up">
+                <img src="/placeholder.svg?height=200&width=400" alt="Article Image" class="w-full h-48 object-cover">
+                <div class="p-5">
+                    <div class="flex items-center mb-3">
+                        <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 text-xs px-3 py-1 rounded-full">Stocks</span>
+                        <span class="text-gray-500 dark:text-gray-400 text-sm ml-3">May 3, 2025</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-secondary dark:text-white mb-2">Tech Stocks to Watch in Q2 2025</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">A comprehensive look at promising technology stocks that could outperform the market in the second quarter of 2025.</p>
+                    <a href="#" class="text-primary hover:underline font-medium">Read More →</a>
+                </div>
+            </div>
+            
+            <!-- Article 2 -->
+            <div class="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-custom" data-aos="fade-up" data-aos-delay="100">
+                <img src="/placeholder.svg?height=200&width=400" alt="Article Image" class="w-full h-48 object-cover">
+                <div class="p-5">
+                    <div class="flex items-center mb-3">
+                        <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs px-3 py-1 rounded-full">Cryptocurrency</span>
+                        <span class="text-gray-500 dark:text-gray-400 text-sm ml-3">May 1, 2025</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-secondary dark:text-white mb-2">Ethereum's Transition: What Traders Need to Know</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">Understanding the implications of Ethereum's latest protocol upgrades and how they might affect your trading strategy.</p>
+                    <a href="#" class="text-primary hover:underline font-medium">Read More →</a>
+                </div>
+            </div>
+            
+            <!-- Article 3 -->
+            <div class="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-custom" data-aos="fade-up" data-aos-delay="200">
+                <img src="/placeholder.svg?height=200&width=400" alt="Article Image" class="w-full h-48 object-cover">
+                <div class="p-5">
+                    <div class="flex items-center mb-3">
+                        <span class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs px-3 py-1 rounded-full">Forex</span>
+                        <span class="text-gray-500 dark:text-gray-400 text-sm ml-3">April 28, 2025</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-secondary dark:text-white mb-2">Central Bank Policies and Their Impact on Currency Markets</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">How recent central bank decisions are shaping forex markets and creating trading opportunities.</p>
+                    <a href="#" class="text-primary hover:underline font-medium">Read More →</a>
+                </div>
+            </div>
+            
+            <!-- Article 4 -->
+            <div class="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-custom" data-aos="fade-up">
+                <img src="/placeholder.svg?height=200&width=400" alt="Article Image" class="w-full h-48 object-cover">
+                <div class="p-5">
+                    <div class="flex items-center mb-3">
+                        <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 text-xs px-3 py-1 rounded-full">Commodities</span>
+                        <span class="text-gray-500 dark:text-gray-400 text-sm ml-3">April 25, 2025</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-secondary dark:text-white mb-2">Gold vs. Bitcoin: Comparing Store of Value Assets</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">An analysis of the performance and characteristics of traditional and digital store of value assets.</p>
+                    <a href="#" class="text-primary hover:underline font-medium">Read More →</a>
+                </div>
+            </div>
+            
+            <!-- Article 5 -->
+            <div class="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-custom" data-aos="fade-up" data-aos-delay="100">
+                <img src="/placeholder.svg?height=200&width=400" alt="Article Image" class="w-full h-48 object-cover">
+                <div class="p-5">
+                    <div class="flex items-center mb-3">
+                        <span class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 text-xs px-3 py-1 rounded-full">Trading Psychology</span>
+                        <span class="text-gray-500 dark:text-gray-400 text-sm ml-3">April 22, 2025</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-secondary dark:text-white mb-2">Mastering Emotional Discipline in Trading</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">Strategies for maintaining emotional control and making rational decisions during volatile market conditions.</p>
+                    <a href="#" class="text-primary hover:underline font-medium">Read More →</a>
+                </div>
+            </div>
+            
+            <!-- Article 6 -->
+            <div class="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-custom" data-aos="fade-up" data-aos-delay="200">
+                <img src="/placeholder.svg?height=200&width=400" alt="Article Image" class="w-full h-48 object-cover">
+                <div class="p-5">
+                    <div class="flex items-center mb-3">
+                        <span class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 text-xs px-3 py-1 rounded-full">Technical Analysis</span>
+                        <span class="text-gray-500 dark:text-gray-400 text-sm ml-3">April 20, 2025</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-secondary dark:text-white mb-2">Advanced Chart Patterns Every Trader Should Know</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">A deep dive into complex chart patterns that can help identify potential market reversals and continuations.</p>
+                    <a href="#" class="text-primary hover:underline font-medium">Read More →</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-10 text-center">
+            <a href="#" class="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors">
+                View All Articles
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Market Analysis -->
+<section class="py-16 bg-white dark:bg-gray-900">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-secondary dark:text-white mb-8">Market <span class="text-primary">Analysis</span></h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Technical Analysis -->
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-custom" data-aos="fade-right">
+                <h3 class="text-xl font-bold text-secondary dark:text-white mb-4">Technical Analysis</h3>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">Our team of expert analysts provides daily technical analysis on major markets, helping you identify potential trading opportunities.</p>
+                
+                <div class="space-y-4">
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-secondary dark:text-white">BTC/USD Analysis</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-sm">May 10, 2025</span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-2">Bitcoin is testing key resistance at $103,500. A breakout could target $110,000, while failure might see a retest of $95,000 support.</p>
+                        <a href="#" class="text-primary hover:underline text-sm font-medium">Read Full Analysis →</a>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-secondary dark:text-white">EUR/USD Analysis</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-sm">May 9, 2025</span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-2">EUR/USD is forming a bullish pattern on the 4-hour chart. Watch for a potential move toward 1.1200 if current support holds.</p>
+                        <a href="#" class="text-primary hover:underline text-sm font-medium">Read Full Analysis →</a>
+                    </div>
+                </div>
+                
+                <a href="#" class="mt-6 inline-block text-primary hover:underline font-medium">View All Technical Analysis →</a>
+            </div>
+            
+            <!-- Economic Calendar -->
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-custom" data-aos="fade-left">
+                <h3 class="text-xl font-bold text-secondary dark:text-white mb-4">Economic Calendar</h3>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">Stay ahead of market-moving events with our comprehensive economic calendar, covering key data releases and central bank decisions.</p>
+                
+                <div class="space-y-4">
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-secondary dark:text-white">US Non-Farm Payrolls</span>
+                            <span class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 text-xs px-2 py-1 rounded">High Impact</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-600 dark:text-gray-300">May 12, 2025 - 8:30 AM EST</span>
+                            <span class="text-gray-600 dark:text-gray-300">Forecast: +180K</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-secondary dark:text-white">ECB Interest Rate Decision</span>
+                            <span class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 text-xs px-2 py-1 rounded">High Impact</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-600 dark:text-gray-300">May 15, 2025 - 7:45 AM EST</span>
+                            <span class="text-gray-600 dark:text-gray-300">Forecast: No Change</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-secondary dark:text-white">UK CPI</span>
+                            <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 text-xs px-2 py-1 rounded">Medium Impact</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-600 dark:text-gray-300">May 17, 2025 - 2:00 AM EST</span>
+                            <span class="text-gray-600 dark:text-gray-300">Forecast: 2.3% YoY</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="#" class="mt-6 inline-block text-primary hover:underline font-medium">View Full Economic Calendar →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="py-16 bg-primary/5 dark:bg-primary/10">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl p-8 md:p-12 shadow-xl">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-secondary dark:text-white mb-4">Subscribe to Our Newsletter</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">Get the latest market insights, trading strategies, and educational content delivered directly to your inbox.</p>
+                
+                <form class="max-w-md mx-auto">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="email" placeholder="Your email address" class="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary">
+                        <button type="submit" class="px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors">
+                            Subscribe
+                        </button>
+                    </div>
+                    <p class="text-gray-500 dark:text-gray-400 text-xs mt-3">We respect your privacy. Unsubscribe at any time.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

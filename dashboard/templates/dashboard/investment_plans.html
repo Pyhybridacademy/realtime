@@ -1,0 +1,163 @@
+{% extends 'dash_base.html' %}
+{% load static %}
+{% load investment_filters %}
+
+{% block title %}Investment Plans{% endblock %}
+
+{% block content %}
+<div class="flex-1 p-4 md:p-6 mt-0 md:mt-0">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Investment Plans</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1 mb-6">Choose from our available investment plans</p>
+
+        <!-- Balance Card -->
+<!-- Balance Card -->
+<div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-6 shadow-lg text-white mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div class="mb-4 md:mb-0">
+            <h3 class="text-lg font-bold mb-1">Your Balance</h3>
+            <p class="text-white text-opacity-80">Available funds for investment</p>
+        </div>
+        <div class="text-right">
+            <p class="text-white text-opacity-80">Total Balance</p>
+            <div class="text-2xl font-bold">{{ total_fiat_value|floatformat:2 }} {{ user_currency }}</div>
+        </div>
+    </div>
+    
+    <!-- Wallet Breakdown -->
+    <div class="mt-3 pt-3 border-t border-white border-opacity-20">
+        <p class="text-xs text-white text-opacity-80 mb-2">Wallet Breakdown:</p>
+        <div class="space-y-1.5">
+            {% for wallet_data in wallet_equivalents %}
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="w-6 h-6 flex items-center justify-center rounded-full 
+                        {% if wallet_data.wallet.crypto_type == 'BTC' %}bg-orange-500
+                        {% elif wallet_data.wallet.crypto_type == 'ETH' %}bg-purple-500
+                        {% elif wallet_data.wallet.crypto_type == 'USDT' %}bg-green-500{% endif %} mr-2">
+                        {% if wallet_data.wallet.crypto_type == 'BTC' %}<i class="fab fa-bitcoin text-xs"></i>
+                        {% elif wallet_data.wallet.crypto_type == 'ETH' %}<i class="fab fa-ethereum text-xs"></i>
+                        {% elif wallet_data.wallet.crypto_type == 'USDT' %}₮{% endif %}
+                    </div>
+                    <span class="text-xs">{{ wallet_data.wallet.crypto_type }}</span>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm font-medium">{{ wallet_data.wallet.balance|floatformat:8 }} {{ wallet_data.wallet.crypto_type }}</div>
+                    <div class="text-xs text-white text-opacity-80">≈ {{ wallet_data.fiat_value|floatformat:2 }} {{ user_currency }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Investment Summary -->
+    <div class="mt-4 pt-4 border-t border-white border-opacity-20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <p class="text-white text-opacity-80 text-sm">Total Invested</p>
+                <div class="font-bold">{{ total_invested|floatformat:2 }} {{ user_currency }}</div>
+            </div>
+            <div>
+                <p class="text-white text-opacity-80 text-sm">Total Profit</p>
+                <div class="font-bold">{{ total_profit|floatformat:2 }} {{ user_currency }}</div>
+            </div>
+            <div>
+                <p class="text-white text-opacity-80 text-sm">Active Investments</p>
+                <p class="font-bold">{{ active_investments|length }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Available Plans -->
+<h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Available Plans</h3>
+
+{% if plans %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for plan in plans %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-card dark:shadow-card-dark hover:shadow-lg dark:hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+        <div class="bg-gradient-to-r 
+            {% if forloop.counter|divisibleby:3 %}from-purple-500 to-indigo-600
+            {% elif forloop.counter|divisibleby:2 %}from-green-500 to-green-700
+            {% else %}from-blue-600 to-blue-800{% endif %} 
+            p-4 text-white">
+            <h3 class="text-lg font-bold mb-1">{{ plan.name }}</h3>
+            <div class="text-2xl font-bold">{{ plan.return_percentage }}%</div>
+            <p class="text-sm text-white text-opacity-80">Return in {{ plan.duration_days }} days</p>
+        </div>
+        
+        <div class="p-6">
+            <p class="text-gray-500 dark:text-gray-400 mb-4">{{ plan.description }}</p>
+            
+            <div class="space-y-3 mb-6">
+                <div class="flex justify-between">
+                    <span class="text-gray-500 dark:text-gray-400">Daily Profit:</span>
+                    <span class="font-medium text-gray-800 dark:text-white">{{ plan.daily_profit_percentage|floatformat:2 }}%</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500 dark:text-gray-400">Min Investment:</span>
+                    <div class="text-right">
+                        <div class="font-medium text-gray-800 dark:text-white">
+                            {{ plan.minimum_amount|floatformat:2 }} {{ user_currency }}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500 dark:text-gray-400">Max Investment:</span>
+                    <div class="text-right">
+                        <div class="font-medium text-gray-800 dark:text-white">
+                            {{ plan.maximum_amount|floatformat:2 }} {{ user_currency }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ROI Calculator -->
+                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="text-sm font-medium text-gray-800 dark:text-white mb-2">Calculate your profit:</div>
+                    <div class="flex items-center">
+                        <input type="number" min="{{ plan.minimum_amount }}" max="{{ plan.maximum_amount }}" 
+                               placeholder="Enter amount ({{ user_currency }})" 
+                               class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-l-lg px-3 py-2 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                               data-plan-id="{{ plan.id }}"
+                               data-return-percentage="{{ plan.return_percentage }}"
+                               data-currency="{{ user_currency }}"
+                               onchange="calculateProfit(this)">
+                        <button class="bg-gray-200 dark:bg-gray-600 px-3 py-2 rounded-r-lg text-gray-800 dark:text-white">
+                            <i class="fas fa-calculator"></i>
+                        </button>
+                    </div>
+                    <div class="mt-2 text-sm">
+                        <div>Profit: <span class="font-medium text-primary-500" id="profit-result-{{ plan.id }}">0.00 {{ user_currency }}</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="{% url 'invest' plan.id %}" class="block w-full text-center bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-lg font-semibold transition-colors duration-200">
+                Invest Now
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+          
+    </div>
+</div>
+
+<script>
+function calculateProfit(input) {
+    const amount = parseFloat(input.value);
+    const planId = input.dataset.planId;
+    const returnPercentage = parseFloat(input.dataset.returnPercentage);
+    const currency = input.dataset.currency;
+    
+    if (!isNaN(amount) && !isNaN(returnPercentage)) {
+        const profit = (amount * returnPercentage / 100).toFixed(2);
+        document.getElementById(`profit-result-${planId}`).textContent = `${profit} ${currency}`;
+    } else {
+        document.getElementById(`profit-result-${planId}`).textContent = `0.00 ${currency}`;
+    }
+}
+</script>
+{% endblock %}

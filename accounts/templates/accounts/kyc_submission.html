@@ -1,0 +1,115 @@
+{% extends 'dash_base.html' %}
+{% load static %}
+
+{% block title %}KYC Submission{% endblock %}
+
+{% block content %}
+<div class="flex-1 p-4 md:p-6">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6">KYC Verification</h1>
+        
+        <div class="bg-white dark:bg-cardBg shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                    Submit KYC Documents
+                </h3>
+                <div class="mt-2 max-w-xl text-sm text-gray-500 dark:text-gray-400">
+                    <p>
+                        Please upload the required documents for KYC verification. All documents must be clear and legible.
+                    </p>
+                </div>
+                <form method="POST" enctype="multipart/form-data" class="mt-5 space-y-6">
+                    {% csrf_token %}
+                    
+                    <div>
+                        <label for="id_id_document" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            ID Document (Passport, Driver's License, or National ID)
+                        </label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600 dark:text-gray-400">
+                                    <label for="id_id_document" class="relative cursor-pointer bg-white dark:bg-gray-700 rounded-md font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
+                                        <span>Upload a file</span>
+                                        {{ form.id_document }}
+                                    </label>
+                                    <p class="pl-1">or drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    PNG, JPG, PDF up to 10MB
+                                </p>
+                            </div>
+                        </div>
+                        {% if form.id_document.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.id_document.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="id_address_proof" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Proof of Address (Utility Bill, Bank Statement, etc.)
+                        </label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600 dark:text-gray-400">
+                                    <label for="id_address_proof" class="relative cursor-pointer bg-white dark:bg-gray-700 rounded-md font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
+                                        <span>Upload a file</span>
+                                        {{ form.address_proof }}
+                                    </label>
+                                    <p class="pl-1">or drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    PNG, JPG, PDF up to 10MB
+                                </p>
+                            </div>
+                        </div>
+                        {% if form.address_proof.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.address_proof.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="id_additional_document" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Additional Document (Optional)
+                        </label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600 dark:text-gray-400">
+                                    <label for="id_additional_document" class="relative cursor-pointer bg-white dark:bg-gray-700 rounded-md font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
+                                        <span>Upload a file</span>
+                                        {{ form.additional_document }}
+                                    </label>
+                                    <p class="pl-1">or drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    PNG, JPG, PDF up to 10MB
+                                </p>
+                            </div>
+                        </div>
+                        {% if form.additional_document.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.additional_document.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button type="button" onclick="window.location.href='{% url 'profile' %}'" class="bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            Cancel
+                        </button>
+                        <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            Submit
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

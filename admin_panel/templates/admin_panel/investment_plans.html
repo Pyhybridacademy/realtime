@@ -1,0 +1,69 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Investment Plans{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6">Investment Plans</h1>
+    
+    <!-- Add Plan Button -->
+    <div class="mb-6">
+        <a href="{% url 'admin_add_investment_plan' %}" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+            <i class="fas fa-plus mr-2"></i> Add New Plan
+        </a>
+    </div>
+    
+    <!-- Plans Table -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h6 class="text-lg font-medium text-gray-900">Investment Plans</h6>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Min Amount</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max Amount</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return %</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration (Days)</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for plan in plans %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ plan.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ plan.minimum_amount }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ plan.maximum_amount }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ plan.return_percentage }}%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ plan.duration_days }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if plan.is_active %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-success-100 text-success-800">Active</span>
+                            {% else %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-secondary-100 text-secondary-800">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href="{% url 'admin_edit_investment_plan' plan.id %}" class="text-info-600 hover:text-info-900 mr-3">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'admin_delete_investment_plan' plan.id %}" class="text-danger-600 hover:text-danger-900" onclick="return confirm('Are you sure you want to delete this plan?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No investment plans found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

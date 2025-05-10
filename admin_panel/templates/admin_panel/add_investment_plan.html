@@ -1,0 +1,84 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Add Investment Plan{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow-sm rounded-lg overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+        <h3 class="text-lg leading-6 font-medium text-secondary-800">Add Investment Plan</h3>
+        <p class="mt-1 max-w-2xl text-sm text-secondary-500">Create a new investment plan for users.</p>
+    </div>
+    <div class="px-4 py-5 sm:p-6">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="sm:col-span-6">
+                    <label for="name" class="block text-sm font-medium text-secondary-700">Plan Name</label>
+                    <div class="mt-1">
+                        <input type="text" id="name" name="name" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-secondary-300 rounded-md">
+                    </div>
+                </div>
+                
+                <div class="sm:col-span-6">
+                    <label for="description" class="block text-sm font-medium text-secondary-700">Description</label>
+                    <div class="mt-1">
+                        <textarea id="description" name="description" rows="3" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-secondary-300 rounded-md"></textarea>
+                    </div>
+                </div>
+                
+                <div class="sm:col-span-3">
+                    <label for="minimum_amount" class="block text-sm font-medium text-secondary-700">Minimum Amount</label>
+                    <div class="mt-1">
+                        <input type="number" id="minimum_amount" name="minimum_amount" step="0.01" min="0" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-secondary-300 rounded-md">
+                    </div>
+                </div>
+                
+                <div class="sm:col-span-3">
+                    <label for="maximum_amount" class="block text-sm font-medium text-secondary-700">Maximum Amount</label>
+                    <div class="mt-1">
+                        <input type="number" id="maximum_amount" name="maximum_amount" step="0.01" min="0" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-secondary-300 rounded-md">
+                    </div>
+                </div>
+                
+                <div class="sm:col-span-3">
+                    <label for="return_percentage" class="block text-sm font-medium text-secondary-700">Return Percentage</label>
+                    <div class="mt-1">
+                        <input type="number" id="return_percentage" name="return_percentage" step="0.01" min="0" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-secondary-300 rounded-md">
+                    </div>
+                    <p class="mt-2 text-sm text-secondary-500">Enter the percentage without the % symbol (e.g., 15 for 15%)</p>
+                </div>
+                
+                <div class="sm:col-span-3">
+                    <label for="duration_days" class="block text-sm font-medium text-secondary-700">Duration (Days)</label>
+                    <div class="mt-1">
+                        <input type="number" id="duration_days" name="duration_days" min="1" required class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-secondary-300 rounded-md">
+                    </div>
+                </div>
+                
+                <div class="sm:col-span-6">
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="is_active" name="is_active" type="checkbox" checked class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-secondary-300 rounded">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="is_active" class="font-medium text-secondary-700">Active</label>
+                            <p class="text-secondary-500">Make this plan available to users</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end space-x-3">
+                <a href="{% url 'admin_add_investment_plan' %}" class="bg-white py-2 px-4 border border-secondary-300 rounded-md shadow-sm text-sm font-medium text-secondary-700 hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-primary-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    Create Plan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

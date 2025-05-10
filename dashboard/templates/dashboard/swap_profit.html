@@ -1,0 +1,88 @@
+
+{% extends 'dash_base.html' %}
+{% load static %}
+
+{% block title %}Swap Profit to Wallet{% endblock %}
+
+{% block content %}
+<div class="flex-1 p-4 md:p-6 mt-0 md:mt-0">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Swap Profit to Wallet</h1>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Swap Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-card dark:shadow-card-dark">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Swap Profit</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Convert your profit to cryptocurrency in your wallet</p>
+                    
+                    <form method="POST" class="space-y-6">
+                        {% csrf_token %}
+                        <div>
+                            <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Amount (USDT)
+                            </label>
+                            <input type="number" step="0.01" name="amount" id="amount" 
+                                class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500" 
+                                placeholder="0.00" required max="{{ balance.profit }}">
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                Available: {{ balance.profit }} USDT
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label for="crypto_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Target Wallet
+                            </label>
+                            <select name="crypto_type" id="crypto_type" 
+                                class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500" 
+                                required>
+                                <option value="">Select wallet</option>
+                                {% for wallet in crypto_wallets %}
+                                <option value="{{ wallet.crypto_type }}">{{ wallet.get_crypto_type_display }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3">
+                            <a href="{% url 'dashboard' %}" class="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                                Cancel
+                            </a>
+                            <button type="submit" class="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold transition-colors duration-200">
+                                Swap Now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Right Column: Info -->
+            <div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-card dark:shadow-card-dark">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Profit Balance</h3>
+                    
+                    <div class="bg-gradient-to-br from-green-600 to-green-800 rounded-xl p-4 text-white shadow-lg mb-4">
+                        <div class="flex items-center">
+                            <div class="bg-white bg-opacity-20 rounded-lg p-2 mr-3">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <span class="font-medium">Available Profit</span>
+                        </div>
+                        <div class="text-2xl font-bold mt-2">{{ balance.profit }} <span class="text-sm font-normal">USDT</span></div>
+                    </div>
+                    
+                    <div class="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 p-4 rounded-lg">
+                        <h4 class="font-medium text-gray-800 dark:text-white mb-2">Swap Information</h4>
+                        <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+                            <li>• Swapping converts your profit to cryptocurrency in your wallet.</li>
+                            <li>• The conversion rate is based on current market prices.</li>
+                            <li>• Once swapped, the profit will be available in your selected wallet.</li>
+                            <li>• Swapped profits can be withdrawn or used for new investments.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} {{ system_settings.site_name }} {% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            500: '#0084D6',
+                            600: '#006bb3'
+                        },
+                        secondary: '#1F2B7B',
+                        darkBg: '#0F172A',
+                        cardBg: '#1E293B'
+                    },
+                    boxShadow: {
+                        'card': '0 4px 20px rgba(0, 0, 0, 0.08)',
+                        'card-dark': '0 4px 20px rgba(0, 0, 0, 0.2)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Enhanced sidebar styles */
+        .sidebar-item {
+            @apply flex items-center py-3 px-4 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300;
+        }
+        .active-item {
+            @apply bg-gray-100 dark:bg-gray-700 font-medium text-primary-500;
+        }
+        .card {
+            @apply bg-primary-500 text-white p-4 rounded-xl shadow-card dark:shadow-card-dark;
+        }
+        .value-card {
+            @apply text-2xl font-bold mt-1;
+        }
+        
+        .crypto-badge {
+            @apply w-10 h-10 rounded-full flex items-center justify-center text-white;
+        }
+        .notification-badge {
+            @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center;
+        }
+        
+        /* Loader animation */
+        .dot-loader {
+          height: 30px;
+          width: 75px;
+          margin: 0 auto;
+          --_g: no-repeat radial-gradient(farthest-side,#0084D6 90%,#0000);
+          background: var(--_g), var(--_g), var(--_g), var(--_g);
+          background-size: 20% 50%;
+          animation: l43 1s infinite linear; 
+        }
+
+        @keyframes l43 {
+          0%     {background-position: calc(0*100%/3) 50% ,calc(1*100%/3) 50% ,calc(2*100%/3) 50% ,calc(3*100%/3) 50% }
+          16.67% {background-position: calc(0*100%/3) 0   ,calc(1*100%/3) 50% ,calc(2*100%/3) 50% ,calc(3*100%/3) 50% }
+          33.33% {background-position: calc(0*100%/3) 100%,calc(1*100%/3) 0   ,calc(2*100%/3) 50% ,calc(3*100%/3) 50% }
+          50%    {background-position: calc(0*100%/3) 50% ,calc(1*100%/3) 100%,calc(2*100%/3) 0   ,calc(3*100%/3) 50% }
+          66.67% {background-position: calc(0*100%/3) 50% ,calc(1*100%/3) 50% ,calc(2*100%/3) 100%,calc(3*100%/3) 0   }
+          83.33% {background-position: calc(0*100%/3) 50% ,calc(1*100%/3) 50% ,calc(2*100%/3) 50% ,calc(3*100%/3) 100%}
+          100%   {background-position: calc(0*100%/3) 50% ,calc(1*100%/3) 50% ,calc(2*100%/3) 50% ,calc(3*100%/3) 50% }
+        }
+        
+        /* Enhanced sidebar transitions */
+        #sidebar {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, width 0.3s ease-in-out;
+        }
+        
+        /* Mobile sidebar animation */
+        @media (max-width: 768px) {
+            #sidebar.hidden {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            #sidebar {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Nav item hover effect */
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 3px;
+            width: 0;
+            background-color: #0084D6;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+        
+        .nav-item:hover::after {
+            width: 100%;
+        }
+        
+        /* Icon pulse animation for notifications */
+        @keyframes icon-pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .pulse-icon {
+            animation: icon-pulse 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-darkBg transition-colors duration-200">
+    <!-- Loader (hidden by default) -->
+    <div id="pageLoader" class="fixed inset-0 flex items-center justify-center bg-white dark:bg-darkBg bg-opacity-80 dark:bg-opacity-80 z-50">
+        <div class="bg-transparent rounded-lg p-6 flex flex-col items-center">
+            <div class="dot-loader mb-4"></div>
+        </div>
+    </div>
+
+    <!-- Toast Messages -->
+    <div class="fixed top-4 right-4 z-50 w-full max-w-xs space-y-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} p-4 rounded-lg shadow-lg flex items-start justify-between bg-{% if message.tags == 'success' %}green-500{% elif message.tags == 'error' %}red-500{% elif message.tags == 'warning' %}yellow-500{% else %}blue-500{% endif %} text-white transform transition-all duration-300 hover:scale-105">
+            <div>
+                {% if message.tags == 'success' %}
+                <i class="fas fa-check-circle mr-2"></i>
+                {% elif message.tags == 'error' %}
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                {% elif message.tags == 'warning' %}
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                {% else %}
+                <i class="fas fa-info-circle mr-2"></i>
+                {% endif %}
+                <span>{{ message }}</span>
+            </div>
+            <button class="ml-4 text-white hover:text-gray-200 transition-colors duration-200" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Mobile Header -->
+        <div class="md:hidden flex items-center justify-between p-4 bg-white dark:bg-gray-800 shadow-sm">
+            <button id="mobileMenuBtn" class="text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors duration-200">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center">
+                <div class="bg-primary-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-2 shadow-md">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <span class="font-bold text-lg dark:text-white">{{ system_settings.site_name }}</span>
+            </div>
+            <div class="bg-primary-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-md">
+                {{ user.first_name|first }}{{ user.last_name|first }}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="hidden md:block w-full md:w-64 bg-white dark:bg-gray-800 p-4 shadow-lg fixed md:relative h-full z-50 flex flex-col">
+            <!-- Logo and Header -->
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center">
+                    <div class="bg-primary-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3 shadow-md">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <span class="font-bold text-lg dark:text-white">{{ system_settings.site_name }}</span>
+                </div>
+                <button id="closeSidebar" class="md:hidden text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full transition-colors duration-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 space-y-2 mb-6 overflow-y-auto">
+                <a href="{% url 'dashboard' %}" class="nav-item flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 group {% if request.path == '/dashboard/' %}bg-gray-100 dark:bg-gray-700 text-primary-500 font-medium{% endif %}">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-primary-500 mr-3">
+                        <i class="fas fa-th-large"></i>
+                    </div>
+                    <span>Dashboard</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-primary-500 transition-transform duration-300 group-hover:translate-x-1"></i>
+                </a>
+                
+                <a href="{% url 'wallet_overview' %}" class="nav-item flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 group {% if 'wallets' in request.path %}bg-gray-100 dark:bg-gray-700 text-primary-500 font-medium{% endif %}">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 mr-3">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <span>Wallets</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-primary-500 transition-transform duration-300 group-hover:translate-x-1"></i>
+                </a>
+                
+                <a href="{% url 'swap_profit' %}" class="nav-item flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 group {% if 'swap_profit' in request.path %}bg-gray-100 dark:bg-gray-700 text-primary-500 font-medium{% endif %}">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 mr-3">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <span>Profit Swap</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-primary-500 transition-transform duration-300 group-hover:translate-x-1"></i>
+                </a>
+                
+                <a href="{% url 'swap_bonus' %}" class="nav-item flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 group {% if 'swap_bonus' in request.path %}bg-gray-100 dark:bg-gray-700 text-primary-500 font-medium{% endif %}">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400 mr-3">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <span>Bonus Swap</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-primary-500 transition-transform duration-300 group-hover:translate-x-1"></i>
+                </a>
+                
+                <a href="{% url 'transactions' %}" class="nav-item flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 group {% if 'transactions' in request.path %}bg-gray-100 dark:bg-gray-700 text-primary-500 font-medium{% endif %}">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400 mr-3">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <span>Payments</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-primary-500 transition-transform duration-300 group-hover:translate-x-1"></i>
+                </a>
+                
+                <a href="{% url 'notifications' %}" class="nav-item flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 group {% if 'notifications' in request.path %}bg-gray-100 dark:bg-gray-700 text-primary-500 font-medium{% endif %}">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 mr-3 relative">
+                        <i class="fas fa-envelope {% if unread_notifications_count %}pulse-icon{% endif %}"></i>
+                        {% if unread_notifications_count %}
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </div>
+                    <span>Messages</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-primary-500 transition-transform duration-300 group-hover:translate-x-1"></i>
+                </a>
+                
+                <a href="{% url 'activities' %}" class="nav-item flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 group {% if 'activities' in request.path %}bg-gray-100 dark:bg-gray-700 text-primary-500 font-medium{% endif %}">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-cyan-100 dark:bg-cyan-900 text-cyan-600 dark:text-cyan-400 mr-3">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <span>Activities</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-primary-500 transition-transform duration-300 group-hover:translate-x-1"></i>
+                </a>
+                
+                <a href="{% url 'investment_plans' %}" class="nav-item flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 group {% if 'investment' in request.path %}bg-gray-100 dark:bg-gray-700 text-primary-500 font-medium{% endif %}">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400 mr-3">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <span>Investments</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-primary-500 transition-transform duration-300 group-hover:translate-x-1"></i>
+                </a>
+                
+                <a href="{% url 'profile' %}" class="nav-item flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 group {% if 'profile' in request.path %}bg-gray-100 dark:bg-gray-700 text-primary-500 font-medium{% endif %}">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 mr-3">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span>Profile</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-primary-500 transition-transform duration-300 group-hover:translate-x-1"></i>
+                </a>
+                
+                <a href="{% url 'settings' %}" class="nav-item flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 group {% if 'settings' in request.path %}bg-gray-100 dark:bg-gray-700 text-primary-500 font-medium{% endif %}">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 mr-3">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <span>Settings</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-primary-500 transition-transform duration-300 group-hover:translate-x-1"></i>
+                </a>
+            </nav>
+
+            <!-- Bottom Section -->
+            <div class="mt-auto">
+                <!-- Dark Mode Toggle -->
+                <div class="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-lg mb-4 hover:shadow-md transition-shadow duration-300">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 mr-3">
+                            <i class="fas fa-moon"></i>
+                        </div>
+                        <span class="text-gray-800 dark:text-gray-200">Dark Mode</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="darkModeToggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
+                    </label>
+                </div>
+
+                <!-- Logout Button -->
+                <a href="{% url 'logout' %}" class="flex items-center px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer transition-all duration-300 group">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 mr-3">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </div>
+                    <span>Logout</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-red-300 group-hover:text-red-500 transition-transform duration-300 group-hover:translate-x-1"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content Block -->
+        {% block content %}{% endblock %}
+<div class="fixed bottom-6 left-6 flex space-x-4 z-50">
+  <!-- WhatsApp Icon -->
+  <a href="https://wa.me/yourphonenumber" target="_blank" rel="noopener noreferrer" 
+     class="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+    </svg>
+  </a>
+  <!-- Telegram Icon -->
+  <a href="https://t.me/yourusername" target="_blank" rel="noopener noreferrer" 
+     class="bg-transparent hover:bg-transparent p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 240 240">
+      <defs>
+        <linearGradient id="a" x1=".667" x2=".417" y1=".167" y2=".75">
+          <stop offset="0" stop-color="#37aee2"/>
+          <stop offset="1" stop-color="#1e96c8"/>
+        </linearGradient>
+        <linearGradient id="b" x1=".66" x2=".851" y1=".437" y2=".802">
+          <stop offset="0" stop-color="#eff7fc"/>
+          <stop offset="1" stop-color="#fff"/>
+        </linearGradient>
+      </defs>
+      <circle cx="120" cy="120" r="120" fill="url(#a)"/>
+      <path fill="#c8daea" d="M98 175c-3.888 0-3.227-1.468-4.568-5.17L82 132.207 170 80"/>
+      <path fill="#a9c9dd" d="M98 175c3 0 4.325-1.372 6-3l16-15.558-19.958-12.035"/>
+      <path fill="url(#b)" d="M100.04 144.41l48.36 35.729c5.519 3.045 9.501 1.468 10.876-5.123l19.685-92.763c2.015-8.08-3.08-11.746-8.36-9.349l-115.59 44.571c-7.89 3.165-7.843 7.567-1.438 9.528l29.663 9.259 68.673-43.325c3.242-1.966 6.218-.91 3.776 1.258"/>
+    </svg>
+  </a>
+</div>
+
+        <script>
+            // Mobile menu toggle
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const closeSidebar = document.getElementById('closeSidebar');
+            const sidebar = document.getElementById('sidebar');
+            
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+                document.body.style.overflow = 'hidden';
+            });
+            
+            closeSidebar.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                document.body.style.overflow = '';
+            });
+
+            // Dark mode toggle functionality
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            
+            // Check for saved theme preference or prefer-color-scheme
+            if (localStorage.getItem('darkMode') === 'true' || 
+                (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                darkModeToggle.checked = true;
+            }
+            
+            // Toggle dark mode
+            darkModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('darkMode', 'true');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('darkMode', 'false');
+                }
+            });
+
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth < 768 && !sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                    sidebar.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // Auto-hide messages after 5 seconds
+            document.addEventListener('DOMContentLoaded', function() {
+                const messages = document.querySelectorAll('.alert');
+                messages.forEach(message => {
+                    setTimeout(() => {
+                        message.classList.add('opacity-0', 'scale-95');
+                        setTimeout(() => {
+                            message.remove();
+                        }, 300);
+                    }, 5000);
+                });
+            });
+            
+            // Function to show/hide the loader
+            function showLoader() {
+                const loader = document.getElementById('pageLoader');
+                loader.style.display = 'flex';
+            }
+
+            function hideLoader() {
+                const loader = document.getElementById('pageLoader');
+                loader.style.display = 'none';
+            }
+
+            // Show loader initially
+            document.addEventListener('DOMContentLoaded', function() {
+                // Hide loader when page is fully loaded
+                hideLoader();
+                
+                // Add loader to all navigation links
+                document.querySelectorAll('a:not([target="_blank"])').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        // Don't show loader for # links or external links
+                        if (this.getAttribute('href') && 
+                            this.getAttribute('href') !== '#' && 
+                            !this.getAttribute('href').startsWith('http')) {
+                            showLoader();
+                        }
+                    });
+                });
+                
+                // Auto-hide messages after 5 seconds
+                const messages = document.querySelectorAll('.alert');
+                messages.forEach(message => {
+                    setTimeout(() => {
+                        message.classList.add('opacity-0', 'scale-95');
+                        setTimeout(() => {
+                            message.remove();
+                        }, 300);
+                    }, 5000);
+                });
+            });
+
+            // Test loader function - you can remove this after testing
+            function testLoader() {
+                showLoader();
+                setTimeout(hideLoader, 3000);
+            }
+        </script>
+    </div>
+</body>
+</html>

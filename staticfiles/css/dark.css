@@ -1,0 +1,74 @@
+/* Dark mode styles with higher specificity to override the fixes */
+body.dark {
+  background-color: #0a0e17 !important;
+  color: white !important;
+}
+
+body.dark header {
+  background-color: #0f172a !important;
+}
+
+body.dark .bg-white {
+  background-color: #1e293b !important;
+}
+
+body.dark .text-gray-700 {
+  color: #e2e8f0 !important;
+}
+
+body.dark .text-gray-600 {
+  color: #cbd5e1 !important;
+}
+
+body.dark .text-secondary {
+  color: white !important;
+}
+
+body.dark .bg-gray-50 {
+  background-color: #1e293b !important;
+}
+
+body.dark .shadow-custom {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark .crypto-card,
+body.dark .feature-card {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+body.dark #mobileMenu {
+  background-color: #1e293b !important;
+}
+
+/* Dark mode toggle button styling */
+.dark-mode-toggle {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 999;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #00d68f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.dark-mode-toggle:hover {
+  transform: scale(1.1);
+}
+
+body.dark .dark-mode-toggle {
+  background-color: #334155 !important;
+}
+
+body.dark .dark-mode-toggle svg {
+  transform: rotate(180deg);
+}

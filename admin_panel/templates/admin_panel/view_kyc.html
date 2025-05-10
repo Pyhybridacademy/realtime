@@ -1,0 +1,109 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}View KYC{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6">KYC Verification Details</h1>
+    
+    <!-- User Info -->
+    <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h6 class="text-lg font-medium text-gray-900">User Information</h6>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p class="mb-3"><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                    <p class="mb-3"><strong>Email:</strong> {{ user.email }}</p>
+                    <p class="mb-3"><strong>Phone:</strong> {{ profile.phone_number }}</p>
+                    <p class="mb-3"><strong>Country:</strong> {{ profile.country.name }}</p>
+                    <p class="mb-3"><strong>City:</strong> {{ profile.city }}</p>
+                </div>
+                <div>
+                    <p class="mb-3"><strong>Gender:</strong> {{ profile.get_gender_display }}</p>
+                    <p class="mb-3"><strong>SSN:</strong> {{ profile.ssn }}</p>
+                    <p class="mb-3"><strong>Submitted:</strong> {{ kyc.created_at|date:"M d, Y H:i" }}</p>
+                    <p class="mb-3"><strong>Status:</strong> 
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-warning-100 text-warning-800">{{ kyc.get_status_display }}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- KYC Documents -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <!-- ID Document -->
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h6 class="text-lg font-medium text-gray-900">ID Document</h6>
+            </div>
+            <div class="p-6 text-center">
+                {% if kyc.id_document %}
+                <a href="{{ kyc.id_document.url }}" target="_blank">
+                    <img src="{{ kyc.id_document.url }}" alt="ID Document" class="mx-auto mb-4 max-h-64">
+                </a>
+                <a href="{{ kyc.id_document.url }}" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg inline-flex items-center" download>
+                    <i class="fas fa-download mr-2"></i> Download
+                </a>
+                {% else %}
+                <p class="text-gray-500">No ID document uploaded</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Address Proof -->
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h6 class="text-lg font-medium text-gray-900">Address Proof</h6>
+            </div>
+            <div class="p-6 text-center">
+                {% if kyc.address_proof %}
+                <a href="{{ kyc.address_proof.url }}" target="_blank">
+                    <img src="{{ kyc.address_proof.url }}" alt="Address Proof" class="mx-auto mb-4 max-h-64">
+                </a>
+                <a href="{{ kyc.address_proof.url }}" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg inline-flex items-center" download>
+                    <i class="fas fa-download mr-2"></i> Download
+                </a>
+                {% else %}
+                <p class="text-gray-500">No address proof uploaded</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Additional Document -->
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h6 class="text-lg font-medium text-gray-900">Additional Document</h6>
+            </div>
+            <div class="p-6 text-center">
+                {% if kyc.additional_document %}
+                <a href="{{ kyc.additional_document.url }}" target="_blank">
+                    <img src="{{ kyc.additional_document.url }}" alt="Additional Document" class="mx-auto mb-4 max-h-64">
+                </a>
+                <a href="{{ kyc.additional_document.url }}" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg inline-flex items-center" download>
+                    <i class="fas fa-download mr-2"></i> Download
+                </a>
+                {% else %}
+                <p class="text-gray-500">No additional document uploaded</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="flex justify-center space-x-4">
+        <a href="{% url 'approve_kyc' kyc.id %}" class="bg-success-600 hover:bg-success-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+            <i class="fas fa-check mr-2"></i> Approve KYC
+        </a>
+        <a href="{% url 'reject_kyc' kyc.id %}" class="bg-danger-600 hover:bg-danger-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+            <i class="fas fa-times mr-2"></i> Reject KYC
+        </a>
+        <a href="{% url 'pending_kyc' %}" class="bg-secondary-500 hover:bg-secondary-600 text-white px-4 py-2 rounded-lg inline-flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Back to List
+        </a>
+    </div>
+</div>
+{% endblock %}

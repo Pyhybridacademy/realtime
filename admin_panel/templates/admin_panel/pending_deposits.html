@@ -1,0 +1,229 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}
+{% if active_tab == 'approved' %}Approved Deposits{% else %}Pending Deposits{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6">Deposits Management</h1>
+    
+    <!-- Tabs -->
+    <div class="border-b border-gray-200 mb-6">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <a href="{% url 'pending_deposits' %}?tab=pending{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" 
+               class="{% if active_tab == 'pending' %}border-primary-500 text-primary-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Pending Deposits
+                <span class="ml-2 py-0.5 px-2.5 text-xs font-medium rounded-full {% if active_tab == 'pending' %}bg-primary-100 text-primary-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ pending_count }}
+                </span>
+            </a>
+            <a href="{% url 'pending_deposits' %}?tab=approved{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" 
+               class="{% if active_tab == 'approved' %}border-primary-500 text-primary-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Approved Deposits
+                <span class="ml-2 py-0.5 px-2.5 text-xs font-medium rounded-full {% if active_tab == 'approved' %}bg-primary-100 text-primary-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ approved_count }}
+                </span>
+            </a>
+        </nav>
+    </div>
+    
+    <!-- Search and Filter Form -->
+    <div class="bg-white shadow rounded-lg p-4 mb-6">
+        <form method="GET" action="{% url 'pending_deposits' %}" class="flex flex-wrap items-end space-x-4">
+            <input type="hidden" name="tab" value="{{ active_tab }}">
+            <div class="mb-2">
+                <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
+                <input type="text" name="search" id="search" value="{{ search_query }}" 
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                       placeholder="Email, name, or transaction ID">
+            </div>
+            <div class="mb-2">
+                <label for="date_from" class="block text-sm font-medium text-gray-700">From Date</label>
+                <input type="date" name="date_from" id="date_from" value="{{ date_from }}" 
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+            </div>
+            <div class="mb-2">
+                <label for="date_to" class="block text-sm font-medium text-gray-700">To Date</label>
+                <input type="date" name="date_to" id="date_to" value="{{ date_to }}" 
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+            </div>
+            <div class="mb-2">
+                <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded">
+                    Filter
+                </button>
+                <a href="{% url 'pending_deposits' %}?tab={{ active_tab }}" class="ml-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Deposits Table -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Crypto</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proof</th>
+                        {% if active_tab == 'pending' %}
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        {% else %}
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for deposit in deposits %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    {% if deposit.user.profile.profile_photo %}
+                                    <img class="h-10 w-10 rounded-full" src="{{ deposit.user.profile.profile_photo.url }}" alt="">
+                                    {% else %}
+                                    <div class="h-10 w-10 rounded-full bg-primary-600 flex items-center justify-center">
+                                        <span class="text-white font-medium">{{ deposit.user.first_name|first }}{{ deposit.user.last_name|first }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ deposit.user.first_name }} {{ deposit.user.last_name }}
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ deposit.user.email }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ deposit.amount }} {{ deposit.currency }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ deposit.get_crypto_type_display }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {% if active_tab == 'approved' %}
+                            {{ deposit.updated_at|date:"M d, Y H:i" }}
+                            {% else %}
+                            {{ deposit.created_at|date:"M d, Y" }}
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {% if deposit.screenshot %}
+                            <a href="{{ deposit.screenshot.url }}" target="_blank" class="text-primary-600 hover:text-primary-900">View Proof</a>
+                            {% else %}
+                            No proof provided
+                            {% endif %}
+                        </td>
+                        {% if active_tab == 'pending' %}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <form method="POST" action="{% url 'approve_deposit' deposit.id %}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="text-success-600 hover:text-success-900 mr-3">Approve</button>
+                            </form>
+                            <form method="POST" action="{% url 'reject_deposit' deposit.id %}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="text-danger-600 hover:text-danger-900">Reject</button>
+                            </form>
+                        </td>
+                        {% else %}
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Completed
+                            </span>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                            {% if active_tab == 'approved' %}
+                            No approved deposits found.
+                            {% else %}
+                            No pending deposits.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if deposits.has_other_pages %}
+    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">
+        <div class="flex-1 flex justify-between sm:hidden">
+            {% if deposits.has_previous %}
+            <a href="?tab={{ active_tab }}&page={{ deposits.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" 
+               class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Previous
+            </a>
+            {% endif %}
+            {% if deposits.has_next %}
+            <a href="?tab={{ active_tab }}&page={{ deposits.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" 
+               class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Next
+            </a>
+            {% endif %}
+        </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm text-gray-700">
+                    Showing
+                    <span class="font-medium">{{ deposits.start_index }}</span>
+                    to
+                    <span class="font-medium">{{ deposits.end_index }}</span>
+                    of
+                    <span class="font-medium">{{ deposits.paginator.count }}</span>
+                    results
+                </p>
+            </div>
+            <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    {% if deposits.has_previous %}
+                    <a href="?tab={{ active_tab }}&page={{ deposits.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" 
+                       class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <span class="sr-only">Previous</span>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    {% endif %}
+                    
+                    {% for i in deposits.paginator.page_range %}
+                        {% if deposits.number == i %}
+                        <span class="relative inline-flex items-center px-4 py-2 border border-primary-500 bg-primary-50 text-sm font-medium text-primary-600">
+                            {{ i }}
+                        </span>
+                        {% elif i > deposits.number|add:'-3' and i < deposits.number|add:'3' %}
+                        <a href="?tab={{ active_tab }}&page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" 
+                           class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            {{ i }}
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if deposits.has_next %}
+                    <a href="?tab={{ active_tab }}&page={{ deposits.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" 
+                       class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <span class="sr-only">Next</span>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

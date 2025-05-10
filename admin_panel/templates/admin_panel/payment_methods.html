@@ -1,0 +1,483 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}{% if active_tab == 'banks' %}Bank Accounts{% else %}Payment Cards{% endif %}{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6">Payment Methods</h1>
+    
+    <!-- Tabs -->
+    <div class="border-b border-gray-200 mb-6">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <a href="{% url 'payment_methods' %}?tab=cards{% if search_query %}&search={{ search_query }}{% endif %}"
+                class="{% if active_tab == 'cards' %}border-primary-500 text-primary-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Payment Cards
+                <span class="ml-2 py-0.5 px-2.5 text-xs font-medium rounded-full {% if active_tab == 'cards' %}bg-primary-100 text-primary-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ cards_count }}
+                </span>
+            </a>
+            <a href="{% url 'payment_methods' %}?tab=banks{% if search_query %}&search={{ search_query }}{% endif %}"
+                class="{% if active_tab == 'banks' %}border-primary-500 text-primary-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Bank Accounts
+                <span class="ml-2 py-0.5 px-2.5 text-xs font-medium rounded-full {% if active_tab == 'banks' %}bg-primary-100 text-primary-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ banks_count }}
+                </span>
+            </a>
+        </nav>
+    </div>
+    
+    <!-- Search Form -->
+    <div class="bg-white shadow rounded-lg p-4 mb-6">
+        <form method="GET" action="{% url 'payment_methods' %}" class="flex items-end space-x-4">
+            <input type="hidden" name="tab" value="{{ active_tab }}">
+            <div class="flex-grow">
+                <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
+                <input type="text" name="search" id="search" value="{{ search_query }}"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                       placeholder="{% if active_tab == 'banks' %}Email, name, bank name, account number{% else %}Email, name, last four digits{% endif %}">
+            </div>
+            <div>
+                <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded">
+                    Search
+                </button>
+                <a href="{% url 'payment_methods' %}?tab={{ active_tab }}" class="ml-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Payment Methods Table -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                        {% if active_tab == 'banks' %}
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bank Name</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account Holder</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account Number</th>
+                        {% else %}
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Card Type</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Four</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th>
+                        {% endif %}
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Added On</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for method in payment_methods %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    {% if method.user.profile.profile_photo %}
+                                    <img class="h-10 w-10 rounded-full" src="{{ method.user.profile.profile_photo.url }}" alt="">
+                                    {% else %}
+                                    <div class="h-10 w-10 rounded-full bg-primary-600 flex items-center justify-center">
+                                        <span class="text-white font-medium">{{ method.user.first_name|first }}{{ method.user.last_name|first }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ method.user.first_name }} {{ method.user.last_name }}
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ method.user.email }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        
+                        {% if active_tab == 'banks' %}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ method.bank_name }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ method.account_holder }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {% if request.user.is_superuser %}
+                                <div class="flex items-center">
+                                    <span>{{ method.get_account_number }}</span>
+                                    <button type="button" class="ml-2 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-2 rounded"
+                                             onclick="navigator.clipboard.writeText('{{ method.get_account_number }}')">
+                                        Copy
+                                    </button>
+                                </div>
+                                {% if method.routing_number %}
+                                <div class="mt-1 text-xs text-gray-500">
+                                    <strong>Routing:</strong> {{ method.get_routing_number }}
+                                </div>
+                                {% endif %}
+                                {% if method.swift_code %}
+                                <div class="mt-1 text-xs text-gray-500">
+                                    <strong>SWIFT:</strong> {{ method.get_swift_code }}
+                                </div>
+                                {% endif %}
+                                {% if method.iban %}
+                                <div class="mt-1 text-xs text-gray-500">
+                                    <strong>IBAN:</strong> {{ method.get_iban }}
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                {{ method.get_masked_account_number }}
+                            {% endif %}
+                        </td>
+                        {% else %}
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                {% if method.card_type == 'visa' %}
+                                <svg class="h-8 w-12 mr-2" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- SVG content for Visa -->
+                                    <rect width="48" height="48" rx="6" fill="#F7F9FC"/>
+                                    <path d="M18.4 31H15.2L13 19H16.2L18.4 31Z" fill="#00579F"/>
+                                    <path d="M30.4 19.3C29.7 19.1 28.6 18.8 27.3 18.8C24.3 18.8 22.2 20.3 22.2 22.5C22.2 24.1 23.7 25 24.8 25.5C25.9 26 26.3 26.4 26.3 26.9C26.3 27.7 25.3 28 24.4 28C23.2 28 22.5 27.8 21.4 27.4L21 27.2L20.5 29.9C21.3 30.2 22.7 30.5 24.2 30.5C27.4 30.5 29.5 29 29.5 26.7C29.5 25.4 28.7 24.4 27 23.7C26 23.2 25.4 22.9 25.4 22.3C25.4 21.8 26 21.3 27.1 21.3C28 21.3 28.7 21.5 29.2 21.7L29.5 21.8L30 19.3H30.4Z" fill="#00579F"/>
+                                    <path d="M34.8 19H32.3C31.6 19 31.1 19.2 30.8 19.9L26.6 31H29.8C29.8 31 30.3 29.7 30.4 29.4C30.7 29.4 33.7 29.4 34.1 29.4C34.2 29.8 34.5 31 34.5 31H37.3L34.8 19ZM31.3 26.8C31.5 26.3 32.5 23.8 32.5 23.8C32.5 23.8 32.8 23 32.9 22.6L33.1 23.7C33.1 23.7 33.7 26.4 33.8 26.8H31.3Z" fill="#00579F"/>
+                                    <path d="M12 19L12.1 19.2C14.1 24.2 17.4 29.6 20 31H17C15.9 29.5 12 23.3 12 19Z" fill="#00579F"/>
+                                </svg>
+                                {% elif method.card_type == 'mastercard' %}
+                                <svg class="h-8 w-12 mr-2" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- SVG content for Mastercard -->
+                                    <rect width="48" height="48" rx="6" fill="#F7F9FC"/>
+                                    <path d="M30 18H18V30H30V18Z" fill="#FFAA00"/>
+                                    <path d="M19.5 24C19.5 21.5 20.5 19.3 22.2 17.8C20.9 16.7 19.3 16 17.5 16C13.4 16 10 19.6 10 24C10 28.4 13.4 32 17.5 32C19.3 32 20.9 31.3 22.2 30.2C20.5 28.7 19.5 26.5 19.5 24Z" fill="#CC0000"/>
+                                    <path d="M38 24C38 28.4 34.6 32 30.5 32C28.7 32 27.1 31.3 25.8 30.2C27.5 28.7 28.5 26.5 28.5 24C28.5 21.5 27.5 19.3 25.8 17.8C27.1 16.7 28.7 16 30.5 16C34.6 16 38 19.6 38 24Z" fill="#FF6600"/>
+                                    <path d="M25.8 17.8C27.5 19.3 28.5 21.5 28.5 24C28.5 26.5 27.5 28.7 25.8 30.2C24.1 28.7 23.1 26.5 23.1 24C23.1 21.5 24.1 19.3 25.8 17.8Z" fill="#FF9900"/>
+                                </svg>
+                                {% elif method.card_type == 'amex' %}
+                                <svg class="h-8 w-12 mr-2" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- SVG content for Amex -->
+                                    <rect width="48" height="48" rx="6" fill="#F7F9FC"/>
+                                    <path d="M38 24C38 28.4 34.6 32 30.5 32H17.5C13.4 32 10 28.4 10 24C10 19.6 13.4 16 17.5 16H30.5C34.6 16 38 19.6 38 24Z" fill="#006FCF"/>
+                                    <path d="M22.5 20L20.5 24L18.5 20H15V20.1L14.5 21L14 20.1V20H11L9 24L7 20H4V26H6.5V22L8.5 26H10.5L12.5 22V26H18.5L19.5 24
+                                                                    H21.5L22.5 24H19.5L20.5 26H23L25 20H22.5Z" fill="white"/>
+                                    <path d="M36 20H33L29 26H31.5L32.3 24.7H36.7L37.5 26H40L36 20ZM33.2 23L34.5 21L35.8 23H33.2Z" fill="white"/>
+                                    <path d="M40 26V20H44L46 22.5L48 20H48V26H45.5V22.5L44 24.5L42.5 22.5V26H40Z" fill="white"/>
+                                </svg>
+                                {% elif method.card_type == 'discover' %}
+                                <svg class="h-8 w-12 mr-2" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- SVG content for Discover -->
+                                    <rect width="48" height="48" rx="6" fill="#F7F9FC"/>
+                                    <path d="M42 24C42 29.5 37.5 34 32 34H16C10.5 34 6 29.5 6 24C6 18.5 10.5 14 16 14H32C37.5 14 42 18.5 42 24Z" fill="#F7F9FC"/>
+                                    <path d="M32 14H16C10.5 14 6 18.5 6 24H42C42 18.5 37.5 14 32 14Z" fill="#FFFFFF"/>
+                                    <path d="M16 34H32C37.5 34 42 29.5 42 24H6C6 29.5 10.5 34 16 34Z" fill="#F48120"/>
+                                    <path d="M24.8 21.5C26.8 21.5 28.5 23.2 28.5 25.2C28.5 27.2 26.8 28.9 24.8 28.9C22.8 28.9 21.1 27.2 21.1 25.2C21.1 23.2 22.8 21.5 24.8 21.5Z" fill="#F48120"/>
+                                </svg>
+                                {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    {{ method.get_card_type_display }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {% if request.user.is_superuser %}
+                            <div class="flex items-center">
+                                <span>{{ method.get_card_number }}</span>
+                                <button type="button" class="ml-2 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-2 rounded"
+                                         onclick="navigator.clipboard.writeText('{{ method.get_card_number }}')">
+                                    Copy
+                                </button>
+                            </div>
+                            {% else %}
+                            •••• {{ method.last_four }}
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ method.expiry_date }}
+                            {% if request.user.is_superuser and method.cvv %}
+                            <div class="mt-1 text-xs text-gray-500">
+                                <strong>CVV:</strong> {{ method.get_cvv }}
+                            </div>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                        
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ method.created_at|date:"M d, Y" }}
+                        </td>
+                        
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <!-- View Details Button -->
+                            {% if active_tab == 'banks' %}
+                            <button type="button" class="text-primary-600 hover:text-primary-900 mr-3" 
+                                    onclick='showDetails("bank", {{ method.id }}, "{% filter escapejs %}
+                                        {
+                                            &quot;bank_name&quot;: &quot;{{ method.bank_name }}&quot;,
+                                            &quot;account_holder&quot;: &quot;{{ method.account_holder }}&quot;,
+                                            &quot;account_number&quot;: &quot;{{ method.account_number|slice:"-4:" }}&quot;,
+                                            {% if request.user.is_superuser %}
+                                            &quot;full_account_number&quot;: &quot;{{ method.get_account_number }}&quot;,
+                                            {% endif %}
+                                            &quot;account_type&quot;: &quot;{{ method.get_account_type_display }}&quot;,
+                                            {% if request.user.is_superuser and method.routing_number %}
+                                            &quot;full_routing_number&quot;: &quot;{{ method.get_routing_number }}&quot;,
+                                            {% endif %}
+                                            {% if request.user.is_superuser and method.swift_code %}
+                                            &quot;full_swift_code&quot;: &quot;{{ method.get_swift_code }}&quot;,
+                                            {% endif %}
+                                            {% if request.user.is_superuser and method.iban %}
+                                            &quot;full_iban&quot;: &quot;{{ method.get_iban }}&quot;,
+                                            {% endif %}
+                                            &quot;bank_address&quot;: &quot;{{ method.bank_address|default:'' }}&quot;,
+                                            &quot;created_at&quot;: &quot;{{ method.created_at|date:'M d, Y' }}&quot;
+                                        }
+                                    {% endfilter %}")'>
+                                View Details
+                            </button>
+                            {% else %}
+                            <button type="button" class="text-primary-600 hover:text-primary-900 mr-3" 
+                                    onclick='showDetails("card", {{ method.id }}, "{% filter escapejs %}
+                                        {
+                                            &quot;card_type&quot;: &quot;{{ method.get_card_type_display }}&quot;,
+                                            &quot;cardholder_name&quot;: &quot;{{ method.cardholder_name }}&quot;,
+                                            &quot;last_four&quot;: &quot;{{ method.last_four }}&quot;,
+                                            {% if request.user.is_superuser and method.card_number %}
+                                            &quot;full_card_number&quot;: &quot;{{ method.get_card_number }}&quot;,
+                                            {% endif %}
+                                            &quot;expiry_date&quot;: &quot;{{ method.expiry_date }}&quot;,
+                                            {% if request.user.is_superuser and method.cvv %}
+                                            &quot;full_cvv&quot;: &quot;{{ method.get_cvv }}&quot;,
+                                            {% endif %}
+                                            &quot;billing_address&quot;: &quot;{{ method.billing_address|default:'' }}&quot;,
+                                            &quot;postal_code&quot;: &quot;{{ method.postal_code|default:'' }}&quot;,
+                                            &quot;is_default&quot;: {% if method.is_default %}true{% else %}false{% endif %},
+                                            &quot;created_at&quot;: &quot;{{ method.created_at|date:'M d, Y' }}&quot;
+                                        }
+                                    {% endfilter %}")'>
+                                View Details
+                            </button>
+                            {% endif %}
+                            
+                            <!-- Delete Form -->
+                            <form method="POST" action="{% url 'delete_payment_method' method.id %}?type={{ active_tab }}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="text-danger-600 hover:text-danger-900" onclick="return confirm('Are you sure you want to delete this payment method?')">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if payment_methods.has_other_pages %}
+    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">
+        <div class="flex-1 flex justify-between sm:hidden">
+            {% if payment_methods.has_previous %}
+            <a href="?tab={{ active_tab }}&page={{ payment_methods.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}"
+                class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Previous
+            </a>
+            {% endif %}
+            {% if payment_methods.has_next %}
+            <a href="?tab={{ active_tab }}&page={{ payment_methods.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}"
+                class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Next
+            </a>
+            {% endif %}
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm text-gray-700">
+                    Showing
+                    <span class="font-medium">{{ payment_methods.start_index }}</span>
+                    to
+                    <span class="font-medium">{{ payment_methods.end_index }}</span>
+                    of
+                    <span class="font-medium">{{ payment_methods.paginator.count }}</span>
+                    results
+                </p>
+            </div>
+            <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    {% if payment_methods.has_previous %}
+                    <a href="?tab={{ active_tab }}&page={{ payment_methods.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}"
+                        class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <span class="sr-only">Previous</span>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    {% endif %}
+                    
+                    {% for i in payment_methods.paginator.page_range %}
+                        {% if payment_methods.number == i %}
+                        <span class="relative inline-flex items-center px-4 py-2 border border-primary-500 bg-primary-50 text-sm font-medium text-primary-600">
+                            {{ i }}
+                        </span>
+                        {% elif i > payment_methods.number|add:'-3' and i < payment_methods.number|add:'3' %}
+                        <a href="?tab={{ active_tab }}&page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}"
+                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            {{ i }}
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if payment_methods.has_next %}
+                    <a href="?tab={{ active_tab }}&page={{ payment_methods.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}"
+                        class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <span class="sr-only">Next</span>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal for viewing full details -->
+<div id="detailsModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Payment Method Details</h3>
+            <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-500">
+                <span class="sr-only">Close</span>
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div id="modalContent" class="space-y-4">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+               <div class="mt-5 sm:mt-6">
+            <button type="button" onclick="closeModal()" class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:text-sm">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showDetails(type, id, data) {
+        const modal = document.getElementById('detailsModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+        
+        // Set title based on type
+        modalTitle.textContent = type === 'card' ? 'Card Details' : 'Bank Account Details';
+        
+        // Parse the JSON data
+        const details = JSON.parse(data.replace(/&quot;/g, '"'));
+        
+        // Build content based on type
+        let contentHTML = '';
+        
+        if (type === 'card') {
+            contentHTML = `
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-1 font-medium">Card Type:</div>
+                    <div class="col-span-2">${details.card_type}</div>
+                    
+                    <div class="col-span-1 font-medium">Cardholder:</div>
+                    <div class="col-span-2">${details.cardholder_name}</div>
+                    
+                    <div class="col-span-1 font-medium">Card Number:</div>
+                    <div class="col-span-2 flex items-center">
+                        ${details.full_card_number || '•••• ' + details.last_four}
+                        ${details.full_card_number ? 
+                            `<button type="button" class="ml-2 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-2 rounded"
+                                     onclick="navigator.clipboard.writeText('${details.full_card_number}')">
+                                Copy
+                            </button>` : ''}
+                    </div>
+                    
+                    <div class="col-span-1 font-medium">Expiry Date:</div>
+                    <div class="col-span-2">${details.expiry_date}</div>
+                    
+                    <div class="col-span-1 font-medium">CVV:</div>
+                    <div class="col-span-2">${details.full_cvv || '•••'}</div>
+                    
+                    <div class="col-span-1 font-medium">Billing Address:</div>
+                    <div class="col-span-2">${details.billing_address || 'Not provided'}</div>
+                    
+                    <div class="col-span-1 font-medium">Postal Code:</div>
+                    <div class="col-span-2">${details.postal_code || 'Not provided'}</div>
+                    
+                    <div class="col-span-1 font-medium">Default:</div>
+                    <div class="col-span-2">${details.is_default ? 'Yes' : 'No'}</div>
+                    
+                    <div class="col-span-1 font-medium">Added On:</div>
+                    <div class="col-span-2">${details.created_at}</div>
+                </div>
+            `;
+        } else {
+            contentHTML = `
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-1 font-medium">Bank Name:</div>
+                    <div class="col-span-2">${details.bank_name}</div>
+                    
+                    <div class="col-span-1 font-medium">Account Holder:</div>
+                    <div class="col-span-2">${details.account_holder}</div>
+                    
+                    <div class="col-span-1 font-medium">Account Number:</div>
+                    <div class="col-span-2 flex items-center">
+                        ${details.full_account_number || '•••• •••• •••• ' + details.account_number}
+                        ${details.full_account_number ? 
+                            `<button type="button" class="ml-2 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-2 rounded"
+                                     onclick="navigator.clipboard.writeText('${details.full_account_number}')">
+                                Copy
+                            </button>` : ''}
+                    </div>
+                    
+                    <div class="col-span-1 font-medium">Account Type:</div>
+                    <div class="col-span-2">${details.account_type}</div>
+                    
+                    <div class="col-span-1 font-medium">Routing Number:</div>
+                    <div class="col-span-2 flex items-center">
+                        ${details.full_routing_number || 'Not provided'}
+                        ${details.full_routing_number ? 
+                            `<button type="button" class="ml-2 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-2 rounded"
+                                     onclick="navigator.clipboard.writeText('${details.full_routing_number}')">
+                                Copy
+                            </button>` : ''}
+                    </div>
+                    
+                    <div class="col-span-1 font-medium">SWIFT Code:</div>
+                    <div class="col-span-2">${details.full_swift_code || 'Not provided'}</div>
+                    
+                    <div class="col-span-1 font-medium">IBAN:</div>
+                    <div class="col-span-2">${details.full_iban || 'Not provided'}</div>
+                    
+                    <div class="col-span-1 font-medium">Bank Address:</div>
+                    <div class="col-span-2">${details.bank_address || 'Not provided'}</div>
+                    
+                    <div class="col-span-1 font-medium">Added On:</div>
+                    <div class="col-span-2">${details.created_at}</div>
+                </div>
+            `;
+        }
+        
+        modalContent.innerHTML = contentHTML;
+        modal.classList.remove('hidden');
+    }
+    
+    function closeModal() {
+        const modal = document.getElementById('detailsModal');
+        modal.classList.add('hidden');
+    }
+    
+    // Close modal when clicking outside
+    document.getElementById('detailsModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeModal();
+        }
+    });
+</script>
+{% endblock %}
+
+

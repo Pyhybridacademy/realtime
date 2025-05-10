@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CMC Net Profit{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            500: '#0084D6',
+                            600: '#006bb3'
+                        },
+                        secondary: '#1F2B7B',
+                        darkBg: '#0F172A',
+                        cardBg: '#1E293B'
+                    },
+                    boxShadow: {
+                        'card': '0 4px 20px rgba(0, 0, 0, 0.08)',
+                        'card-dark': '0 4px 20px rgba(0, 0, 0, 0.2)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-item {
+            @apply flex items-center py-3 px-4 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200;
+        }
+        .active-item {
+            @apply bg-gray-100 dark:bg-gray-700 font-medium text-primary-500;
+        }
+        .card {
+            @apply bg-primary-500 text-white p-4 rounded-xl shadow-card dark:shadow-card-dark;
+        }
+        .value-card {
+            @apply text-2xl font-bold mt-1;
+        }
+        .social-fixed {
+            @apply fixed bottom-6 left-6 flex gap-4 z-50;
+        }
+        .crypto-badge {
+            @apply w-10 h-10 rounded-full flex items-center justify-center text-white;
+        }
+        .notification-badge {
+            @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-darkBg transition-colors duration-200">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Mobile Header -->
+        <div class="md:hidden flex items-center justify-between p-4 bg-white dark:bg-gray-800 shadow-sm">
+            <button id="mobileMenuBtn" class="text-gray-500 dark:text-gray-300">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center">
+                <div class="bg-primary-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <span class="font-bold text-lg dark:text-white">CMC Net Profit</span>
+            </div>
+            <div class="bg-primary-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                {{ user.first_name|first }}{{ user.last_name|first }}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="hidden md:block w-full md:w-64 bg-white dark:bg-gray-800 p-4 shadow-lg fixed md:relative h-full z-50 flex flex-col">
+            <!-- Logo and Header -->
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center">
+                    <div class="bg-primary-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <span class="font-bold text-lg dark:text-white">CMC Net Profit</span>
+                </div>
+                <button id="closeSidebar" class="md:hidden text-gray-500 dark:text-gray-300">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 space-y-1 mb-4">
+                <a href="{% url 'dashboard' %}" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 group {% if request.path == '/dashboard/' %}active bg-gray-100 dark:bg-gray-700{% endif %}">
+                    <i class="fas fa-th-large mr-3 text-primary-500 w-5 text-center"></i>
+                    <span class="font-medium">Dashboard</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"></i>
+                </a>
+                <a href="{% url 'wallet_overview' %}" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 group {% if 'wallets' in request.path %}active bg-gray-100 dark:bg-gray-700{% endif %}">
+                    <i class="fas fa-wallet mr-3 text-primary-500 w-5 text-center"></i>
+                    <span>Wallets</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"></i>
+                </a>
+                <a href="{% url 'transactions' %}" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 group {% if 'transactions' in request.path %}active bg-gray-100 dark:bg-gray-700{% endif %}">
+                    <i class="fas fa-exchange-alt mr-3 text-primary-500 w-5 text-center"></i>
+                    <span>Transactions</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"></i>
+                </a>
+                <a href="{% url 'notifications' %}" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 group {% if 'notifications' in request.path %}active bg-gray-100 dark:bg-gray-700{% endif %}">
+                    <i class="fas fa-envelope mr-3 text-primary-500 w-5 text-center"></i>
+                    <span>Messages</span>
+                    {% if unread_notifications_count %}
+                    <span class="notification-badge">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"></i>
+                </a>
+                <a href="{% url 'transactions' %}" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 group {% if 'payments' in request.path %}active bg-gray-100 dark:bg-gray-700{% endif %}">
+                    <i class="fas fa-credit-card mr-3 text-primary-500 w-5 text-center"></i>
+                    <span>Payments</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"></i>
+                </a>
+                <a href="{% url 'investments' %}" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 group {% if 'investment' in request.path %}active bg-gray-100 dark:bg-gray-700{% endif %}">
+                    <i class="fas fa-chart-line mr-3 text-primary-500 w-5 text-center"></i>
+                    <span>Investments</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"></i>
+                </a>
+                <a href="{% url 'settings' %}" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 group {% if 'settings' in request.path %}active bg-gray-100 dark:bg-gray-700{% endif %}">
+                    <i class="fas fa-cog mr-3 text-primary-500 w-5 text-center"></i>
+                    <span>Settings</span>
+                    <i class="fas fa-chevron-right ml-auto text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"></i>
+                </a>
+            </nav>
+
+            <!-- Bottom Section -->
+            <div class="mt-auto">
+                <!-- Dark Mode Toggle -->
+                <div class="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-lg mb-3">
+                    <div class="flex items-center">
+                        <i class="fas fa-moon mr-3 text-primary-500 w-5 text-center"></i>
+                        <span class="text-gray-800 dark:text-gray-200">Dark Mode</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="darkModeToggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
+                    </label>
+                </div>
+
+                <!-- Logout Button -->
+                <div class="flex items-center px-4 py-3 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer transition-colors duration-200">
+                    <i class="fas fa-sign-out-alt mr-3 w-5 text-center"></i>
+                    <span>Logout</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Block -->
+        {% block content %}{% endblock %}
+
+        <!-- Fixed Social Icons -->
+        <div class="social-fixed shadow-lg">
+            <a href="#" class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center hover:bg-green-600 transition-colors duration-200 shadow-lg">
+                <i class="fab fa-whatsapp"></i>
+            </a>
+            <a href="#" class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors duration-200 shadow-lg">
+                <i class="fab fa-telegram"></i>
+            </a>
+        </div>
+
+        <script>
+            // Mobile menu toggle
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const closeSidebar = document.getElementById('closeSidebar');
+            const sidebar = document.getElementById('sidebar');
+            
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+                document.body.style.overflow = 'hidden';
+            });
+            
+            closeSidebar.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                document.body.style.overflow = '';
+            });
+
+            // Dark mode toggle functionality
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            
+            // Check for saved theme preference or prefer-color-scheme
+            if (localStorage.getItem('darkMode') === 'true' || 
+                (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                darkModeToggle.checked = true;
+            }
+            
+            // Toggle dark mode
+            darkModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('darkMode', 'true');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('darkMode', 'false');
+                }
+            });
+
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth < 768 && !sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                    sidebar.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

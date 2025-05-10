@@ -1,0 +1,184 @@
+{% extends 'dash_base.html' %}
+{% load static %}
+
+{% block title %}Add Card{% endblock %}
+
+{% block content %}
+<div class="flex-1 p-4 md:p-6 mt-0 md:mt-0">
+    <div class="max-w-lg mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Add Card</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1 mb-6">Add your card details for withdrawals</p>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-card dark:shadow-card-dark overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">
+                    Card Details
+                </h3>
+            </div>
+            
+            <div class="p-6">
+                <form method="POST" action="{% url 'add_card' %}" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Card Type -->
+                    <div>
+                        <label for="id_card_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Card Type
+                        </label>
+                        {{ form.card_type }}
+                        {% if form.card_type.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.card_type.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Card Number -->
+                    <div>
+                        <label for="id_card_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Card Number
+                        </label>
+                        {{ form.card_number }}
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Your card number is encrypted and stored securely</p>
+                        {% if form.card_number.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.card_number.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Last 4 Digits (only shown if card number is not provided) -->
+                    <!-- Last 4 Digits (only shown if card number is not provided) -->
+                    <div id="last_four_container">
+                        <label for="id_last_four" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Last 4 Digits
+                        </label>
+                        {{ form.last_four }}
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">If you prefer not to enter your full card number</p>
+                        {% if form.last_four.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.last_four.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    
+                    <!-- Cardholder Name -->
+                    <div>
+                        <label for="id_cardholder_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Cardholder Name
+                        </label>
+                        {{ form.cardholder_name }}
+                        {% if form.cardholder_name.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.cardholder_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Expiry Date and CVV in a row -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="id_expiry_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Expiry Date
+                            </label>
+                            {{ form.expiry_date }}
+                            {% if form.expiry_date.errors %}
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.expiry_date.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label for="id_cvv" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                CVV/CVC
+                            </label>
+                            {{ form.cvv }}
+                            {% if form.cvv.errors %}
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.cvv.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Billing Address -->
+                    <div>
+                        <label for="id_billing_address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Billing Address
+                        </label>
+                        {{ form.billing_address }}
+                        {% if form.billing_address.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.billing_address.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Postal Code -->
+                    <div>
+                        <label for="id_postal_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Postal/ZIP Code
+                        </label>
+                        {{ form.postal_code }}
+                        {% if form.postal_code.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.postal_code.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Default Card Checkbox -->
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            {{ form.is_default }}
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="id_is_default" class="font-medium text-gray-700 dark:text-gray-300">Set as default payment method</label>
+                            <p class="text-gray-500 dark:text-gray-400">This card will be used as your default payment method for withdrawals</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Notice -->
+                    <div class="rounded-md bg-blue-50 dark:bg-blue-900/30 p-4 mt-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3 flex-1 md:flex md:justify-between">
+                                <p class="text-sm text-blue-700 dark:text-blue-300">
+                                    Your card information is encrypted and stored securely. We comply with PCI DSS standards.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <a href="{% url 'wallet_overview' %}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                            Cancel
+                        </a>
+                        <button type="submit" class="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors duration-200">
+                            Add Card
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript to toggle last_four field visibility based on card_number -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cardNumberInput = document.getElementById('id_card_number');
+    const lastFourContainer = document.getElementById('last_four_container');
+    const lastFourInput = document.getElementById('id_last_four');
+    
+    // Function to toggle last_four visibility
+    function toggleLastFourVisibility() {
+        if (cardNumberInput.value.trim() !== '') {
+            lastFourContainer.style.display = 'none';
+            // When hiding the last_four field, make it not required
+            lastFourInput.value = '';  // Clear the value
+        } else {
+            lastFourContainer.style.display = 'block';
+        }
+    }
+    
+    // Initial check
+    toggleLastFourVisibility();
+    
+    // Add event listener for changes
+    cardNumberInput.addEventListener('input', toggleLastFourVisibility);
+});
+
+</script>
+{% endblock %}
+

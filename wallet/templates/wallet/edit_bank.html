@@ -1,0 +1,134 @@
+{% extends 'dash_base.html' %}
+{% load static %}
+
+{% block title %}Edit Bank Account{% endblock %}
+
+{% block content %}
+<div class="flex-1 p-4 md:p-6 mt-0 md:mt-0">
+    <div class="max-w-lg mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Edit Bank Account</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1 mb-6">Update your bank account details</p>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-card dark:shadow-card-dark overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">
+                    Bank Account Details
+                </h3>
+            </div>
+            
+            <div class="p-6">
+                <form method="POST" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Required Fields Section -->
+                    <div class="mb-6">
+                        <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Required Information</h4>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label for="id_bank_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Bank Name
+                                </label>
+                                {{ form.bank_name }}
+                                {% if form.bank_name.errors %}
+                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.bank_name.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label for="id_account_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Account Number
+                                </label>
+                                {{ form.account_number }}
+                                {% if form.account_number.errors %}
+                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.account_number.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label for="id_account_holder" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Account Holder Name
+                                </label>
+                                {{ form.account_holder }}
+                                {% if form.account_holder.errors %}
+                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.account_holder.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label for="id_account_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Account Type
+                                </label>
+                                {{ form.account_type }}
+                                {% if form.account_type.errors %}
+                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.account_type.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Optional Fields Section -->
+                    <div class="mb-6">
+                        <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-4">Additional Information (Optional)</h4>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label for="id_routing_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Routing Number (ABA)
+                                </label>
+                                {{ form.routing_number }}
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Required for US bank accounts</p>
+                                {% if form.routing_number.errors %}
+                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.routing_number.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label for="id_swift_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    SWIFT/BIC Code
+                                </label>
+                                {{ form.swift_code }}
+                                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Required for international transfers</p>
+                                {% if form.swift_code.errors %}
+                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.swift_code.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label for="id_iban" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    IBAN
+                                </label>
+                                {{ form.iban }}
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Required for European bank accounts</p>
+                                {% if form.iban.errors %}
+                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.iban.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label for="id_bank_address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Bank Address
+                                </label>
+                                {{ form.bank_address }}
+                                {% if form.bank_address.errors %}
+                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.bank_address.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <a href="{% url 'wallet_overview' %}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                            Cancel
+                        </a>
+                        <button type="submit" class="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors duration-200">
+                            Update Bank Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

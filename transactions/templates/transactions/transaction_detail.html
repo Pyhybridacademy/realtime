@@ -1,0 +1,146 @@
+{% extends 'dash_base.html' %}
+{% load static %}
+
+{% block title %}Transaction Details{% endblock %}
+
+{% block content %}
+<div class="flex-1 p-4 md:p-6 mt-0 md:mt-0">
+    <div class="max-w-6xl mx-auto">
+        <div class="mb-6">
+            <a href="{% url 'transactions' %}" class="inline-flex items-center text-sm text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Transactions
+            </a>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-card dark:shadow-card-dark overflow-hidden">
+            <div class="px-6 py-5 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">
+                        Transaction Details
+                    </h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Transaction ID: {{ transaction.id }}
+                    </p>
+                </div>
+                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    {% if transaction.status == 'pending' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200{% elif transaction.status == 'completed' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% elif transaction.status == 'rejected' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200{% endif %}">
+                    {{ transaction.get_status_display }}
+                </span>
+            </div>
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                <div class="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Transaction Type
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2 flex items-center">
+                        <div class="flex-shrink-0 h-8 w-8 flex items-center justify-center rounded-full mr-2
+                            {% if transaction.transaction_type == 'deposit' %}bg-green-100 dark:bg-green-900{% elif transaction.transaction_type == 'withdrawal' %}bg-red-100 dark:bg-red-900{% elif transaction.transaction_type == 'profit' %}bg-blue-100 dark:bg-blue-900{% elif transaction.transaction_type == 'bonus' %}bg-yellow-100 dark:bg-yellow-900{% elif transaction.transaction_type == 'investment' %}bg-purple-100 dark:bg-purple-900{% endif %}">
+                            {% if transaction.transaction_type == 'deposit' %}
+                            <svg class="h-5 w-5 text-green-600 dark:text-green-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            {% elif transaction.transaction_type == 'withdrawal' %}
+                            <svg class="h-5 w-5 text-red-600 dark:text-red-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                            </svg>
+                            {% elif transaction.transaction_type == 'profit' %}
+                            <svg class="h-5 w-5 text-blue-600 dark:text-blue-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                            {% elif transaction.transaction_type == 'bonus' %}
+                            <svg class="h-5 w-5 text-yellow-600 dark:text-yellow-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {% elif transaction.transaction_type == 'investment' %}
+                            <svg class="h-5 w-5 text-purple-600 dark:text-purple-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            {% endif %}
+                        </div>
+                        {{ transaction.get_transaction_type_display }}
+                    </dd>
+                </div>
+                <div class="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 bg-gray-50 dark:bg-gray-700">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Amount
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                        {{ transaction.amount }} {{ transaction.currency }}
+                    </dd>
+                </div>
+                {% if transaction.crypto_type %}
+                <div class="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Cryptocurrency
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                        {{ transaction.get_crypto_type_display }}
+                    </dd>
+                </div>
+                {% endif %}
+                {% if transaction.wallet %}
+                <div class="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 bg-gray-50 dark:bg-gray-700">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Wallet
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                        {{ transaction.wallet.get_crypto_type_display }} Wallet
+                    </dd>
+                </div>
+                {% endif %}
+                {% if transaction.withdrawal_address %}
+                <div class="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Withdrawal Address
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                        {{ transaction.withdrawal_address }}
+                    </dd>
+                </div>
+                {% endif %}
+                <div class="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 bg-gray-50 dark:bg-gray-700">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Date
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                        {{ transaction.created_at|date:"F d, Y H:i" }}
+                    </dd>
+                </div>
+                {% if transaction.completed_at %}
+                <div class="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Completed Date
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                        {{ transaction.completed_at|date:"F d, Y H:i" }}
+                    </dd>
+                </div>
+                {% endif %}
+                {% if transaction.notes %}
+                <div class="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 bg-gray-50 dark:bg-gray-700">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Notes
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                        {{ transaction.notes }}
+                    </dd>
+                </div>
+                {% endif %}
+                {% if transaction.rejection_reason %}
+                <div class="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Rejection Reason
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                        {{ transaction.rejection_reason }}
+                    </dd>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,581 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}System Settings{% endblock %}
+
+{% block content %}
+<!-- Page Heading -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">System Settings</h1>
+    <div class="flex space-x-2">
+        <button type="button" id="testEmailBtn" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <i class="fas fa-envelope mr-2"></i> Test Email
+        </button>
+        <button type="button" id="backupSettingsBtn" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+            <i class="fas fa-download mr-2"></i> Backup Settings
+        </button>
+    </div>
+</div>
+
+<!-- Settings Form -->
+<div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <div class="px-5 py-4 bg-white border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-800">Manage System Settings</h3>
+    </div>
+    
+    <div class="p-6">
+        <form method="post" id="settingsForm">
+            {% csrf_token %}
+            
+            <!-- Tabs -->
+            <div class="border-b border-gray-200 mb-6">
+                <nav class="-mb-px flex space-x-8" x-data="{ activeTab: 'site' }">
+                    <button type="button" @click="activeTab = 'site'" :class="{ 'border-primary-500 text-primary-600': activeTab === 'site', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'site' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none">
+                        <i class="fas fa-globe mr-2"></i> Site Settings
+                    </button>
+                    <button type="button" @click="activeTab = 'email'" :class="{ 'border-primary-500 text-primary-600': activeTab === 'email', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'email' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none">
+                        <i class="fas fa-envelope mr-2"></i> Email Settings
+                    </button>
+                    <button type="button" @click="activeTab = 'payment'" :class="{ 'border-primary-500 text-primary-600': activeTab === 'payment', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'payment' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none">
+                        <i class="fas fa-wallet mr-2"></i> Payment Settings
+                    </button>
+                    <button type="button" @click="activeTab = 'referral'" :class="{ 'border-primary-500 text-primary-600': activeTab === 'referral', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'referral' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none">
+                        <i class="fas fa-users mr-2"></i> Referral & KYC
+                    </button>
+                    <button type="button" @click="activeTab = 'system'" :class="{ 'border-primary-500 text-primary-600': activeTab === 'system', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'system' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none">
+                        <i class="fas fa-cogs mr-2"></i> System Settings
+                    </button>
+                </nav>
+            </div>
+            
+            <!-- Site Settings Tab -->
+            <div x-show="activeTab === 'site'" class="space-y-6">
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-md">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-blue-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                These settings control the basic information about your platform that is displayed to users.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Site Name -->
+                    <div>
+                        <label for="{{ form.site_name.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Site Name
+                        </label>
+                        {{ form.site_name }}
+                        {% if form.site_name.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.site_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Contact Email -->
+                    <div>
+                        <label for="{{ form.contact_email.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Contact Email
+                        </label>
+                        {{ form.contact_email }}
+                        {% if form.contact_email.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.contact_email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Contact Phone -->
+                    <div>
+                        <label for="{{ form.contact_phone.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Contact Phone
+                        </label>
+                        {{ form.contact_phone }}
+                        {% if form.contact_phone.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.contact_phone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Site Description -->
+                <div>
+                    <label for="{{ form.site_description.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Site Description
+                    </label>
+                    {{ form.site_description }}
+                    {% if form.site_description.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.site_description.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">This description will be used in meta tags and for SEO purposes.</p>
+                </div>
+                
+                <!-- Contact Address -->
+                <div>
+                    <label for="{{ form.contact_address.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Contact Address
+                    </label>
+                    {{ form.contact_address }}
+                    {% if form.contact_address.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.contact_address.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Social Media Links -->
+                <h4 class="text-lg font-medium text-gray-900 mt-8 mb-4">Social Media Links</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Facebook -->
+                    <div>
+                        <label for="{{ form.facebook_link.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-facebook text-blue-600 mr-2"></i> Facebook
+                        </label>
+                        {{ form.facebook_link }}
+                    </div>
+                    
+                    <!-- Twitter -->
+                    <div>
+                        <label for="{{ form.twitter_link.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-twitter text-blue-400 mr-2"></i> Twitter
+                        </label>
+                        {{ form.twitter_link }}
+                    </div>
+                    
+                    <!-- Instagram -->
+                    <div>
+                        <label for="{{ form.instagram_link.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-instagram text-pink-600 mr-2"></i> Instagram
+                        </label>
+                        {{ form.instagram_link }}
+                    </div>
+                    
+                    <!-- LinkedIn -->
+                    <div>
+                        <label for="{{ form.linkedin_link.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-linkedin text-blue-700 mr-2"></i> LinkedIn
+                        </label>
+                        {{ form.linkedin_link }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Email Settings Tab -->
+            <div x-show="activeTab === 'email'" class="space-y-6" style="display: none;">
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-md">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <strong>Important:</strong> These settings will update your Django email configuration. Make sure to test your email settings after making changes.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Email Host -->
+                    <div>
+                        <label for="{{ form.email_host.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            SMTP Server
+                        </label>
+                        {{ form.email_host }}
+                        {% if form.email_host.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.email_host.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">e.g., smtp.gmail.com, smtp.sendgrid.net</p>
+                    </div>
+                    
+                    <!-- Email Port -->
+                    <div>
+                        <label for="{{ form.email_port.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            SMTP Port
+                        </label>
+                        {{ form.email_port }}
+                        {% if form.email_port.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.email_port.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">Common ports: 587 (TLS), 465 (SSL), 25 (non-secure)</p>
+                    </div>
+                    
+                    <!-- Email Host User -->
+                    <div>
+                        <label for="{{ form.email_host_user.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            SMTP Username
+                        </label>
+                        {{ form.email_host_user }}
+                        {% if form.email_host_user.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.email_host_user.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Email Host Password -->
+                    <div>
+                        <label for="{{ form.email_host_password.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            SMTP Password
+                        </label>
+                        {{ form.email_host_password }}
+                        {% if form.email_host_password.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.email_host_password.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Default From Email -->
+                    <div>
+                        <label for="{{ form.default_from_email.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Default From Email
+                        </label>
+                        {{ form.default_from_email }}
+                        {% if form.default_from_email.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.default_from_email.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">This will be the sender email address for all outgoing emails.</p>
+                    </div>
+                    
+                    <!-- Email Use TLS -->
+                    <div class="flex items-center">
+                        <div class="flex items-center h-5">
+                            {{ form.email_use_tls }}
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="{{ form.email_use_tls.id_for_label }}" class="font-medium text-gray-700">Use TLS</label>
+                            <p class="text-gray-500">Enable Transport Layer Security for secure email transmission.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payment Settings Tab -->
+            <div x-show="activeTab === 'payment'" class="space-y-6" style="display: none;">
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-md">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-blue-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                Enter your cryptocurrency wallet addresses below. These will be displayed to users when they make deposits.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- BTC Address -->
+                    <div>
+                        <label for="{{ form.btc_address.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-bitcoin text-orange-500 mr-2"></i> Bitcoin (BTC) Address
+                        </label>
+                        {{ form.btc_address }}
+                        {% if form.btc_address.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.btc_address.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- ETH Address -->
+                    <div>
+                        <label for="{{ form.eth_address.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-ethereum text-purple-600 mr-2"></i> Ethereum (ETH) Address
+                        </label>
+                        {{ form.eth_address }}
+                        {% if form.eth_address.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.eth_address.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- USDT Address -->
+                    <div>
+                        <label for="{{ form.usdt_address.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            <i class="fas fa-dollar-sign text-green-600 mr-2"></i> Tether (USDT) Address
+                        </label>
+                        {{ form.usdt_address }}
+                        {% if form.usdt_address.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.usdt_address.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            
+            <!-- Referral & KYC Tab -->
+            <div x-show="activeTab === 'referral'" class="space-y-6" style="display: none;">
+                <!-- Referral Settings -->
+                <h4 class="text-lg font-medium text-gray-900 mb-4">Referral Program Settings</h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Enable Referrals -->
+                    <div class="flex items-center">
+                        <div class="flex items-center h-5">
+                            {{ form.enable_referrals }}
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="{{ form.enable_referrals.id_for_label }}" class="font-medium text-gray-700">Enable Referral Program</label>
+                            <p class="text-gray-500">Allow users to refer others and earn bonuses.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Referral Bonus Percentage -->
+                    <div>
+                        <label for="{{ form.referral_bonus_percentage.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Referral Bonus Percentage
+                        </label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            {{ form.referral_bonus_percentage }}
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">%</span>
+                            </div>
+                        </div>
+                        {% if form.referral_bonus_percentage.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.referral_bonus_percentage.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">Percentage of deposit that referrers will receive as bonus.</p>
+                    </div>
+                </div>
+                
+                <!-- KYC Settings -->
+                <h4 class="text-lg font-medium text-gray-900 mt-8 mb-4">KYC Settings</h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- KYC Required -->
+                    <div class="flex items-center">
+                        <div class="flex items-center h-5">
+                            {{ form.kyc_required }}
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="{{ form.kyc_required.id_for_label }}" class="font-medium text-gray-700">Require KYC Verification</label>
+                            <p class="text-gray-500">Users must complete KYC before making withdrawals.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- KYC Documents Required -->
+                <div>
+                    <label for="{{ form.kyc_documents_required.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Required KYC Documents
+                    </label>
+                    {{ form.kyc_documents_required }}
+                    {% if form.kyc_documents_required.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.kyc_documents_required.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">List the documents users need to provide for KYC verification.</p>
+                </div>
+            </div>
+            
+            <!-- System Settings Tab -->
+            <div x-show="activeTab === 'system'" class="space-y-6" style="display: none;">
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-md">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <strong>Warning:</strong> Changing these settings may affect the functionality of your platform. Make changes carefully.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Minimum Withdrawal -->
+                    <div>
+                        <label for="{{ form.min_withdrawal.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Minimum Withdrawal Amount
+                        </label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">$</span>
+                            </div>
+                            {{ form.min_withdrawal }}
+                        </div>
+                        {% if form.min_withdrawal.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.min_withdrawal.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Withdrawal Fee Percentage -->
+                    <div>
+                        <label for="{{ form.withdrawal_fee_percentage.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Withdrawal Fee Percentage
+                        </label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            {{ form.withdrawal_fee_percentage }}
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">%</span>
+                            </div>
+                        </div>
+                        {% if form.withdrawal_fee_percentage.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.withdrawal_fee_percentage.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Maintenance Mode -->
+                <div class="mt-6">
+                    <div class="flex items-center">
+                        <div class="flex items-center h-5">
+                            {{ form.maintenance_mode }}
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="{{ form.maintenance_mode.id_for_label }}" class="font-medium text-gray-700">Enable Maintenance Mode</label>
+                            <p class="text-gray-500">When enabled, only administrators can access the site.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Maintenance Message -->
+                <div>
+                    <label for="{{ form.maintenance_message.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Maintenance Mode Message
+                    </label>
+                    {{ form.maintenance_message }}
+                    {% if form.maintenance_message.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.maintenance_message.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">This message will be displayed to users when maintenance mode is enabled.</p>
+                </div>
+            </div>
+            
+            <!-- Form Buttons -->
+            <div class="mt-8 flex justify-end space-x-3">
+                <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" onclick="resetForm()">
+                    Reset
+                </button>
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    Save Settings
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script>
+    // Wait for Alpine.js to be available
+document.addEventListener('DOMContentLoaded', function() {
+    // Make sure Alpine is loaded
+    if (typeof Alpine === 'undefined') {
+        console.warn('Alpine.js is not loaded yet. Waiting for it to load...');
+        
+        // Poll for Alpine.js to be available
+        const checkAlpine = setInterval(function() {
+            if (typeof Alpine !== 'undefined') {
+                clearInterval(checkAlpine);
+                console.log('Alpine.js is now available, initializing tabs');
+                initializeTabs();
+            }
+        }, 100);
+    } else {
+        initializeTabs();
+    }
+    
+    // Function to initialize our tab system manually if Alpine.js isn't behaving correctly
+    function initializeTabs() {
+        // Get all tab buttons and content panels
+        const tabButtons = document.querySelectorAll('.border-b.border-gray-200.mb-6 button');
+        const tabPanels = [
+            document.querySelector('div[x-show="activeTab === \'site\'"]'),
+            document.querySelector('div[x-show="activeTab === \'email\'"]'),
+            document.querySelector('div[x-show="activeTab === \'payment\'"]'),
+            document.querySelector('div[x-show="activeTab === \'referral\'"]'),
+            document.querySelector('div[x-show="activeTab === \'system\'"]')
+        ];
+        
+        // Function to activate a tab
+        function activateTab(tabName) {
+            // Update button styles
+            tabButtons.forEach(button => {
+                if (button.getAttribute('@click').includes(tabName)) {
+                    button.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                    button.classList.add('border-primary-500', 'text-primary-600');
+                } else {
+                    button.classList.remove('border-primary-500', 'text-primary-600');
+                    button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                }
+            });
+            
+            // Show/hide panels
+            tabPanels.forEach(panel => {
+                if (panel.getAttribute('x-show').includes(tabName)) {
+                    panel.style.display = 'block';
+                } else {
+                    panel.style.display = 'none';
+                }
+            });
+        }
+        
+        // Add click listeners to buttons
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const clickAttr = this.getAttribute('@click');
+                const tabName = clickAttr.match(/activeTab = '([^']+)'/)[1];
+                activateTab(tabName);
+            });
+        });
+        
+        // Activate default tab
+        activateTab('site');
+    }
+    
+    // Function to reset form
+    window.resetForm = function() {
+        if (confirm('Are you sure you want to reset all changes? This will revert to the last saved settings.')) {
+            document.getElementById('settingsForm').reset();
+        }
+    };
+    
+    // Test email functionality
+    document.getElementById('testEmailBtn').addEventListener('click', function() {
+        // Get email settings from form
+        const emailHost = document.getElementById('id_email_host').value;
+        const emailPort = document.getElementById('id_email_port').value;
+        const emailUser = document.getElementById('id_email_host_user').value;
+        const emailPass = document.getElementById('id_email_host_password').value;
+        
+        if (!emailHost || !emailPort || !emailUser || !emailPass) {
+            alert('Please fill in all email settings before testing.');
+            return;
+        }
+        
+        // In a real application, you would send an AJAX request to test the email settings
+        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Testing...';
+        
+        // Simulate a test (replace with actual AJAX call)
+        setTimeout(() => {
+            this.innerHTML = '<i class="fas fa-envelope mr-2"></i> Test Email';
+            alert('Email test completed! Check your inbox for a test email.');
+        }, 2000);
+    });
+    
+    // Backup settings functionality
+    document.getElementById('backupSettingsBtn').addEventListener('click', function() {
+        // In a real application, you would send an AJAX request to get the settings as JSON
+        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Preparing...';
+        
+        // Simulate a backup (replace with actual AJAX call)
+        setTimeout(() => {
+            this.innerHTML = '<i class="fas fa-download mr-2"></i> Backup Settings';
+            
+            // Create a sample JSON object with settings
+            const settings = {
+                site_name: document.getElementById('id_site_name').value,
+                site_description: document.getElementById('id_site_description').value,
+                // Add other fields as needed
+            };
+            
+            // Create a download link for the JSON
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(settings, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "system_settings_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }, 1500);
+    });
+});
+</script>
+{% endblock %}

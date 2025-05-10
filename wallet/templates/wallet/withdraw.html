@@ -1,0 +1,164 @@
+{% extends 'dash_base.html' %}
+{% load static %}
+
+{% block title %}Withdraw from {{ wallet.get_crypto_type_display }} Wallet{% endblock %}
+
+{% block content %}
+<div class="flex-1 p-4 md:p-6 mt-0 md:mt-0">
+    <div class="max-w-lg mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Withdraw {{ wallet.get_crypto_type_display }}</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1 mb-6">Current Balance: <span class="font-medium">{{ wallet.balance }} {{ wallet.crypto_type }}</span></p>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-card dark:shadow-card-dark overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">
+                    Withdrawal Information
+                </h3>
+            </div>
+            
+            <div class="p-6">
+                <form method="POST" class="space-y-6">
+                    {% csrf_token %}
+                    <div>
+                        <label for="id_amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Amount to Withdraw ({{ wallet.crypto_type }})
+                        </label>
+                        <input type="number" step="0.00000001" name="amount" id="id_amount" required class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="0.00" max="{{ wallet.balance }}">
+                        {% if form.amount.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.amount.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="id_withdrawal_method" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Withdrawal Method
+                        </label>
+                        <select id="id_withdrawal_method" name="withdrawal_method" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option value="bank">Bank Account</option>
+                            <option value="card">Card</option>
+                            <option value="crypto">Crypto Address</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Bank Account Selection -->
+                    <div id="bank-selection" class="withdrawal-method-section">
+                        {% if banks %}
+                        <label for="id_bank" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Select Bank Account
+                        </label>
+                        <select id="id_bank" name="bank" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            {% for bank in banks %}
+                            <option value="{{ bank.id }}">{{ bank.bank_name }} - {{ bank.account_number }}</option>
+                            {% endfor %}
+                        </select>
+                        {% else %}
+                        <div class="rounded-lg bg-yellow-50 dark:bg-yellow-900 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-yellow-400 dark:text-yellow-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">No bank accounts available</h3>
+                                    <div class="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
+                                        <p>
+                                            Please <a href="{% url 'add_bank' %}" class="font-medium underline text-yellow-700 dark:text-yellow-200 hover:text-yellow-600 dark:hover:text-yellow-100">add a bank account</a> before withdrawing to bank.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Card Selection -->
+                    <div id="card-selection" class="withdrawal-method-section hidden">
+                        {% if cards %}
+                        <label for="id_card" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Select Card
+                        </label>
+                        <select id="id_card" name="card" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            {% for card in cards %}
+                            <option value="{{ card.id }}">{{ card.card_type }} - **** {{ card.last_four }}</option>
+                            {% endfor %}
+                        </select>
+                        {% else %}
+                        <div class="rounded-lg bg-yellow-50 dark:bg-yellow-900 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-yellow-400 dark:text-yellow-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">No cards available</h3>
+                                    <div class="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
+                                        <p>
+                                            Please <a href="{% url 'add_card' %}" class="font-medium underline text-yellow-700 dark:text-yellow-200 hover:text-yellow-600 dark:hover:text-yellow-100">add a card</a> before withdrawing to card.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Crypto Address -->
+                    <div id="crypto-address" class="withdrawal-method-section hidden">
+                        <label for="id_crypto_address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ wallet.get_crypto_type_display }} Address
+                        </label>
+                        <input type="text" name="crypto_address" id="id_crypto_address" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter your {{ wallet.get_crypto_type_display }} address">
+                    </div>
+                    
+                    <div>
+                        <button type="submit" class="w-full py-3 px-4 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors duration-200">
+                            Request Withdrawal
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        <strong class="font-medium text-gray-700 dark:text-gray-300">Note:</strong> Withdrawal requests are processed within 24-48 hours. You will receive a notification once your withdrawal has been processed.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toggle withdrawal method sections
+    const withdrawalMethodSelect = document.getElementById('id_withdrawal_method');
+    const bankSelection = document.getElementById('bank-selection');
+    const cardSelection = document.getElementById('card-selection');
+    const cryptoAddress = document.getElementById('crypto-address');
+    
+    function toggleWithdrawalMethod() {
+        const method = withdrawalMethodSelect.value;
+        
+        // Hide all sections
+        bankSelection.classList.add('hidden');
+        cardSelection.classList.add('hidden');
+        cryptoAddress.classList.add('hidden');
+        
+        // Show selected section
+        if (method === 'bank') {
+            bankSelection.classList.remove('hidden');
+        } else if (method === 'card') {
+            cardSelection.classList.remove('hidden');
+        } else if (method === 'crypto') {
+            cryptoAddress.classList.remove('hidden');
+        }
+    }
+    
+    withdrawalMethodSelect.addEventListener('change', toggleWithdrawalMethod);
+    
+    // Initialize on page load
+    toggleWithdrawalMethod();
+</script>
+{% endblock %}
