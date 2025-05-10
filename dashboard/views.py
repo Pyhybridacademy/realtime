@@ -59,7 +59,7 @@ def dashboard(request):
             fiat_value = convert_crypto_to_fiat(
                 wallet.balance, 
                 wallet.crypto_type, 
-                user_currency, 
+                user_currency,
                 exchange_rates
             )
             
@@ -70,12 +70,51 @@ def dashboard(request):
             
             total_fiat_value += fiat_value
     
+    # Calculate deposits by crypto type
+    deposit_by_crypto = []
+    
+    # Get all completed deposit transactions
+    deposit_transactions = Transaction.objects.filter(
+        user=request.user,
+        transaction_type='deposit',
+        status='completed'
+    )
+    
+    # Group deposits by crypto type
+    crypto_types = ['BTC', 'ETH', 'USDT']
+    for crypto_type in crypto_types:
+        crypto_deposits = deposit_transactions.filter(crypto_type=crypto_type)
+        
+        if crypto_deposits.exists():
+            # Sum the deposits for this crypto type
+            crypto_amount = crypto_deposits.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.0')
+            
+            # Convert to fiat
+            fiat_value = convert_crypto_to_fiat(
+                crypto_amount,
+                crypto_type,
+                user_currency,
+                exchange_rates
+            )
+            
+            # Only add to the list if there are deposits
+            if crypto_amount > 0:
+                deposit_by_crypto.append({
+                    'crypto_type': crypto_type,
+                    'crypto_amount': crypto_amount,
+                    'fiat_value': fiat_value
+                })
+    
+    # Sort by fiat value (highest first)
+    deposit_by_crypto.sort(key=lambda x: x['fiat_value'], reverse=True)
+    total_deposit_fiat = sum(deposit_data['fiat_value'] for deposit_data in deposit_by_crypto)
     # Create a dictionary with both crypto and fiat values
     fiat_balance = {
         'total': total_fiat_value,
         'profit': convert_crypto_to_fiat(balance.profit, 'USDT', user_currency, exchange_rates),
         'bonus': convert_crypto_to_fiat(balance.bonus, 'USDT', user_currency, exchange_rates),
-        'deposit': convert_crypto_to_fiat(balance.deposit, 'USDT', user_currency, exchange_rates)
+        'deposit': convert_crypto_to_fiat(balance.deposit, 'USDT', user_currency, exchange_rates),
+        'deposit': total_deposit_fiat 
     }
     
     # Get recent transactions
@@ -156,6 +195,7 @@ def dashboard(request):
     context = {
         'crypto_wallets': crypto_wallets,
         'wallet_equivalents': wallet_equivalents,
+        'deposit_by_crypto': deposit_by_crypto,  # New deposit breakdown
         'recent_transactions': recent_transactions,
         'recent_deposits': recent_deposits,
         'investments': investments,

@@ -376,11 +376,12 @@
                 </div>
                 
                 <div class="md:w-1/2 flex justify-center" data-aos="fade-left" data-aos-duration="1000">
-                    <div class="relative">
+                    <div class="relative max-w-lg mx-auto">
                         <img src="{% static 'images/2.png' %}" alt="Financial Growth" class="w-full max-w-lg hero-image" style="animation-delay: 2s;">
                         
-                        <div class="absolute -top-10 -right-10 bg-white p-6 rounded-lg shadow-lg transform transition-all duration-500 hover:scale-105" data-aos="zoom-in" data-aos-delay="300">
-                            <div class="text-4xl font-bold text-primary">90%+</div>
+                        <!-- Fixed the floating card that was causing horizontal scroll -->
+                        <div class="absolute top-0 right-0 sm:-top-10 sm:-right-10 bg-white p-4 sm:p-6 rounded-lg shadow-lg transform transition-all duration-500 hover:scale-105" data-aos="zoom-in" data-aos-delay="300">
+                            <div class="text-3xl sm:text-4xl font-bold text-primary">90%+</div>
                             <div class="text-gray-600">Satisfied clients</div>
                             <div class="w-full bg-gray-200 h-2 rounded-full mt-2">
                                 <div class="bg-blue-500 h-2 rounded-full animate-pulse-slow" style="width: 90%"></div>

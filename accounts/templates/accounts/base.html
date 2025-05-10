@@ -49,6 +49,29 @@
 
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+    <style>
+        /* Fix for horizontal overflow */
+        body {
+            overflow-x: hidden;
+        }
+        
+        /* Responsive logo and button styles */
+        @media (max-width: 640px) {
+            .site-logo {
+                font-size: 1.25rem;
+            }
+            
+            .site-logo svg {
+                width: 1.75rem;
+                height: 1.75rem;
+            }
+            
+            .join-now-btn {
+                font-size: 0.875rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-white">
@@ -58,16 +81,16 @@
             <div class="flex items-center justify-between">
                 <!-- Logo -->
                 <a href="#" class="flex items-center">
-                    <div class="text-3xl font-bold">
+                    <div class="text-3xl sm:text-3xl font-bold site-logo">
                         <span class="flex items-center">
-                            <svg class="w-10 h-10 text-secondary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="w-8 h-8 sm:w-10 sm:h-10 text-secondary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 <path d="M12 2L12 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 <path d="M19.7942 7L4.20577 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 <path d="M21.5 12L2.5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 <path d="M19.7942 17L4.20577 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <span class="ml-2 text-secondary">{{ system_settings.site_name }}</span>
+                            <span class="ml-2 text-secondary text-xl sm:text-3xl">{{ system_settings.site_name }}</span>
                         </span>
                     </div>
                 </a>
@@ -98,7 +121,7 @@
                         <a href="{% url 'logout' %}" class="hidden md:block text-gray-700 hover:text-primary font-medium transition-colors duration-300">Logout</a>
                     {% else %}
                         <a href="{% url 'login' %}" class="hidden md:block text-gray-700 hover:text-primary font-medium transition-colors duration-300">Login</a>
-                        <a href="{% url 'register_step1' %}" class="bg-primary text-white px-6 py-2 rounded-md font-medium hover:bg-opacity-90 transition-all pulse-btn">Join Now</a>
+                        <a href="{% url 'register_step1' %}" class="bg-primary text-white px-4 sm:px-6 py-2 rounded-md font-medium hover:bg-opacity-90 transition-all pulse-btn join-now-btn text-sm sm:text-base">Join Now</a>
                     {% endif %}
                     
                     <button class="md:hidden text-gray-700" id="mobileMenuBtn">

@@ -77,6 +77,69 @@
     </script>
     
     <style>
+        /* Mobile-first sidebar styles */
+        @media (max-width: 1023px) {
+            #sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                bottom: 0;
+                z-index: 50;
+                transition: left 0.3s ease;
+                width: 280px;
+            }
+            
+            #sidebar.sidebar-open {
+                left: 0;
+            }
+            
+            #sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0,0,0,0.5);
+                z-index: 40;
+            }
+            
+            #sidebar-overlay.sidebar-overlay-open {
+                display: block;
+            }
+            
+            .mobile-header {
+                display: flex;
+            }
+            
+            .desktop-header {
+                display: none;
+            }
+            
+            .main-content {
+                margin-top: 64px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .mobile-header {
+                display: none;
+            }
+            
+            .desktop-header {
+                display: flex;
+            }
+            
+            #sidebar {
+                position: relative;
+                left: 0;
+            }
+            
+            .main-content {
+                margin-top: 0;
+            }
+        }
+        
         /* Smooth transitions */
         .transition-all {
             transition-property: all;
@@ -118,9 +181,67 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-gray-50 font-sans antialiased">
+    <!-- Mobile Header -->
+    <header class="mobile-header bg-white shadow-sm z-30 lg:hidden fixed w-full">
+        <div class="flex items-center justify-between h-16 px-4">
+            <!-- Mobile menu button -->
+            <button id="mobileSidebarToggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            
+            <!-- Logo for mobile -->
+            <div class="flex items-center">
+                <h1 class="text-xl font-bold text-gray-800">{{ system_settings.site_name }}</h1>
+            </div>
+            
+            <!-- User dropdown for mobile -->
+            <div class="relative" x-data="{ open: false }">
+                <button @click="open = !open" class="flex items-center text-gray-700 hover:text-gray-900 focus:outline-none">
+                    {% if request.user.profile.avatar %}
+                    <img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.get_full_name }}" class="w-8 h-8 rounded-full object-cover">
+                    {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.email|urlencode }}&background=0D8ABC&color=fff" alt="{{ request.user.get_full_name|default:request.user.email }}" class="w-8 h-8 rounded-full">
+                    {% endif %}
+                </button>
+                
+                <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                    {% if request.user.is_authenticated %}
+                        <a href="{% url 'admin_profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-user mr-2 text-gray-500"></i> Profile
+                        </a>
+                        <a href="{% url 'admin_change_password' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-key mr-2 text-gray-500"></i> Change Password
+                        </a>
+                        <div class="border-t border-gray-200"></div>
+                        <a href="{% url 'admin_logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-sign-out-alt mr-2 text-gray-500"></i> Logout
+                        </a>
+                    {% else %}
+                        <a href="{% url 'admin_login' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-sign-in-alt mr-2 text-gray-500"></i> Login
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pending actions mobile notification -->
+        {% with total_pending=pending_deposits|add:pending_withdrawals|add:pending_kyc|add:pending_users|default:0 %}
+        {% if total_pending > 0 %}
+        <div class="bg-yellow-50 text-yellow-800 text-sm px-4 py-2 flex items-center justify-between">
+            <span>{{ total_pending }} pending actions</span>
+            <a href="{% url 'pending_approvals' %}" class="text-yellow-600 hover:text-yellow-800 font-medium">Review</a>
+        </div>
+        {% endif %}
+        {% endwith %}
+    </header>
+    
+    <!-- Sidebar Overlay (mobile only) -->
+    <div id="sidebar-overlay" class="lg:hidden"></div>
+    
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <div id="sidebar" class="bg-gray-900 text-white w-64 min-h-screen flex-shrink-0 transition-all duration-300 ease-in-out flex flex-col">
+        <div id="sidebar" class="bg-gray-900 text-white w-64 min-h-screen flex-shrink-0 transition-all duration-300 ease-in-out flex flex-col lg:relative">
             <div class="flex items-center justify-between h-16 px-4 border-b border-gray-800">
                 <div class="flex items-center space-x-2">
                     <div class="logo-icon hidden">
@@ -128,6 +249,9 @@
                     </div>
                     <h1 class="text-xl font-bold text-white logo-text">{{ system_settings.site_name }}</h1>
                 </div>
+                <button id="sidebarToggle" class="text-gray-400 hover:text-white lg:hidden">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             
             <div class="flex-1 overflow-y-auto py-4 px-3">
@@ -221,7 +345,7 @@
             </div>
             
             <!-- Sidebar footer -->
-            <div class="p-4 border-t border-gray-800">
+            <div class="p-4 border-t border-gray-800 hidden lg:block">
                 <div class="flex items-center">
                     {% if request.user.profile.avatar %}
                     <img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.get_full_name }}" class="w-10 h-10 rounded-full object-cover">
@@ -238,12 +362,12 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Top Navigation -->
-            <header class="bg-white shadow-sm z-10">
+            <!-- Desktop Header -->
+            <header class="desktop-header bg-white shadow-sm z-10">
                 <div class="flex items-center justify-between h-16 px-6">
                     <!-- Left side - Toggle and Breadcrumbs -->
                     <div class="flex items-center space-x-4">
-                        <button id="sidebarToggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <button id="desktopSidebarToggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
                             <i class="fas fa-bars"></i>
                         </button>
                         
@@ -364,29 +488,41 @@
                         <!-- User Dropdown -->
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 focus:outline-none">
-                                {% if request.user.profile.avatar %}
-                                <img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.get_full_name }}" class="w-8 h-8 rounded-full object-cover">
+                                {% if request.user.is_authenticated %}
+                                    {% if request.user.profile.avatar %}
+                                    <img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.get_full_name }}" class="w-8 h-8 rounded-full object-cover">
+                                    {% else %}
+                                    <img src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.email|urlencode }}&background=0D8ABC&color=fff" alt="{{ request.user.get_full_name|default:request.user.email }}" class="w-8 h-8 rounded-full">
+                                    {% endif %}
+                                    <span class="hidden md:inline">{{ request.user.get_full_name|default:request.user.email }}</span>
+                                    <i class="fas fa-chevron-down text-xs hidden md:inline"></i>
                                 {% else %}
-                                <img src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|urlencode }}&background=0D8ABC&color=fff" alt="{{ request.user.get_full_name }}" class="w-8 h-8 rounded-full">
+                                    <img src="https://ui-avatars.com/api/?name=Guest&background=0D8ABC&color=fff" alt="Guest" class="w-8 h-8 rounded-full">
+                                    <span class="hidden md:inline">Guest</span>
+                                    <i class="fas fa-chevron-down text-xs hidden md:inline"></i>
                                 {% endif %}
-                                <span class="hidden md:inline">{{ request.user.get_full_name|default:request.user.email }}</span>
-                                <i class="fas fa-chevron-down text-xs hidden md:inline"></i>
                             </button>
                             
                             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                                <a href="{% url 'admin_profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-user mr-2 text-gray-500"></i> Profile
-                                </a>
-                                <a href="{% url 'admin_change_password' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-key mr-2 text-gray-500"></i> Change Password
-                                </a>
-                                <a href="{% url 'system_settings' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-cog mr-2 text-gray-500"></i> Settings
-                                </a>
-                                <div class="border-t border-gray-200"></div>
-                                <a href="{% url 'admin_logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-sign-out-alt mr-2 text-gray-500"></i> Logout
-                                </a>
+                                {% if request.user.is_authenticated %}
+                                    <a href="{% url 'admin_profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-user mr-2 text-gray-500"></i> Profile
+                                    </a>
+                                    <a href="{% url 'admin_change_password' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-key mr-2 text-gray-500"></i> Change Password
+                                    </a>
+                                    <a href="{% url 'system_settings' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-cog mr-2 text-gray-500"></i> Settings
+                                    </a>
+                                    <div class="border-t border-gray-200"></div>
+                                    <a href="{% url 'admin_logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-sign-out-alt mr-2 text-gray-500"></i> Logout
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'admin_login' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-sign-in-alt mr-2 text-gray-500"></i> Login
+                                    </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -425,7 +561,7 @@
             </div>
             
             <!-- Main Content Area -->
-            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-50 main-content">
                 <!-- Page Header -->
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-gray-800">{% block page_title %}Dashboard{% endblock %}</h2>
@@ -442,7 +578,32 @@
     
     <!-- Sidebar Toggle Script -->
     <script>
+        // Mobile sidebar toggle
+        document.getElementById('mobileSidebarToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.add('sidebar-open');
+            overlay.classList.add('sidebar-overlay-open');
+        });
+        
+        // Close sidebar when clicking overlay
+        document.getElementById('sidebar-overlay').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.remove('sidebar-open');
+            overlay.classList.remove('sidebar-overlay-open');
+        });
+        
+        // Close sidebar when clicking close button
         document.getElementById('sidebarToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.remove('sidebar-open');
+            overlay.classList.remove('sidebar-overlay-open');
+        });
+        
+        // Desktop sidebar toggle (collapse/expand)
+        document.getElementById('desktopSidebarToggle').addEventListener('click', function() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('sidebar-collapsed');
         });

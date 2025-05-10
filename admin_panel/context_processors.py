@@ -4,7 +4,7 @@ from transactions.models import Transaction
 from accounts.models import KYC
 from dashboard.models import Investment
 from django.db.models import Sum
-
+import datetime
 
 User = get_user_model()
 
@@ -15,7 +15,10 @@ def admin_stats(request):
     """
     # Only add these variables for authenticated admin users
     if not request.user.is_authenticated or not request.user.is_staff:
-        return {}
+        # Return minimal context for non-admin users
+        return {
+            'current_year': datetime.datetime.now().year,
+        }
     
     # Get counts for dashboard
     total_users = User.objects.filter(is_staff=False).count()
@@ -45,6 +48,7 @@ def admin_stats(request):
         'total_withdrawals': total_withdrawals,
         'active_investments': active_investments,
         'total_invested': total_invested,
+        'current_year': datetime.datetime.now().year,
     }
 
 

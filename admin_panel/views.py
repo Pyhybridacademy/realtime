@@ -69,7 +69,19 @@ def admin_login(request):
         else:
             error_message = 'Invalid credentials or insufficient permissions'
     
-    return render(request, 'admin_panel/login.html', {'error_message': error_message})
+    # Get system settings
+    try:
+        from .models import SystemSettings
+        system_settings = SystemSettings.get_settings()
+    except:
+        system_settings = None
+    
+    context = {
+        'error_message': error_message,
+        'system_settings': system_settings,
+    }
+    
+    return render(request, 'admin_panel/login.html', context)
 
 @login_required
 @user_passes_test(is_admin)
@@ -167,6 +179,9 @@ def admin_dashboard(request):
             'withdrawals': float(withdrawals)
         })
     
+    # Get investment plans for the dashboard
+    investment_plans = InvestmentPlan.objects.all()
+    
     context = {
         'total_users': total_users,
         'pending_users': pending_users,
@@ -179,7 +194,8 @@ def admin_dashboard(request):
         'total_invested': total_invested,
         'recent_transactions': recent_transactions,
         'recent_users': recent_users,
-        'daily_transactions': daily_transactions
+        'daily_transactions': daily_transactions,
+        'investment_plans': investment_plans,
     }
     
     return render(request, 'admin_panel/dashboard.html', context)

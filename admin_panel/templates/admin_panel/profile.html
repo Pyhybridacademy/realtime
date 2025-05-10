@@ -1,126 +1,161 @@
 {% extends "admin_panel/base.html" %}
 
+{% block title %}Admin Profile - {{ system_settings.site_name }}{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Profile Information Card -->
-        <div class="col-lg-4">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4 class="card-title">Admin Profile</h4>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Profile Information Card -->
+    <div class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Admin Profile</h3>
+            </div>
+            <div class="px-6 py-5">
+                <div class="flex flex-col items-center mb-6">
+                    {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="Admin Avatar" class="w-32 h-32 rounded-full object-cover border-4 border-primary-100">
+                    {% else %}
+                        <div class="w-32 h-32 rounded-full bg-primary-500 flex items-center justify-center text-white text-4xl font-bold border-4 border-primary-100">
+                            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                        </div>
+                    {% endif %}
                 </div>
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        {% if user.profile.avatar %}
-                            <img src="{{ user.profile.avatar.url }}" alt="Admin Avatar" class="rounded-circle img-fluid" style="width: 150px;">
-                        {% else %}
-                            <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center bg-primary text-white" style="width: 150px; height: 150px; margin: 0 auto;">
-                                <span style="font-size: 50px;">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
-                            </div>
-                        {% endif %}
+                
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500">Full Name</h4>
+                        <p class="mt-1 text-lg font-medium text-gray-900">{{ user.first_name }} {{ user.last_name }}</p>
                     </div>
                     
-                    <div class="mb-3">
-                        <h5 class="text-muted mb-1">Full Name</h5>
-                        <p class="lead">{{ user.first_name }} {{ user.last_name }}</p>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500">Email</h4>
+                        <p class="mt-1 text-lg font-medium text-gray-900">{{ user.email }}</p>
                     </div>
                     
-                    <div class="mb-3">
-                        <h5 class="text-muted mb-1">Email</h5>
-                        <p class="lead">{{ user.email }}</p>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <h5 class="text-muted mb-1">Role</h5>
-                        <p class="lead">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500">Role</h4>
+                        <p class="mt-1 text-lg font-medium text-gray-900">
                             {% if user.is_superuser %}
-                                Super Administrator
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                    Super Administrator
+                                </span>
                             {% else %}
-                                Administrator
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    Administrator
+                                </span>
                             {% endif %}
                         </p>
                     </div>
                     
-                    <div class="mb-3">
-                        <h5 class="text-muted mb-1">Last Login</h5>
-                        <p class="lead">{{ user.last_login|date:"F d, Y H:i" }}</p>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500">Last Login</h4>
+                        <p class="mt-1 text-lg font-medium text-gray-900">{{ user.last_login|date:"F d, Y H:i" }}</p>
                     </div>
                     
-                    <div class="mb-3">
-                        <h5 class="text-muted mb-1">Date Joined</h5>
-                        <p class="lead">{{ user.date_joined|date:"F d, Y" }}</p>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500">Date Joined</h4>
+                        <p class="mt-1 text-lg font-medium text-gray-900">{{ user.date_joined|date:"F d, Y" }}</p>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Change Password Card -->
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title">Change Password</h4>
-                </div>
-                <div class="card-body">
-                    {% if messages %}
-                    <div class="messages mb-4">
-                        {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}">
-                            {{ message }}
+    </div>
+    
+    <!-- Change Password Card -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Change Password</h3>
+            </div>
+            <div class="px-6 py-5">
+                <!-- Messages -->
+                {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} p-4 rounded-lg border-l-4 {% if message.tags == 'success' %}bg-green-50 border-green-500 text-green-700{% elif message.tags == 'error' %}bg-red-50 border-red-500 text-red-700{% else %}bg-blue-50 border-blue-500 text-blue-700{% endif %}">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                {% if message.tags == 'success' %}
+                                <i class="fas fa-check-circle"></i>
+                                {% elif message.tags == 'error' %}
+                                <i class="fas fa-exclamation-circle"></i>
+                                {% else %}
+                                <i class="fas fa-info-circle"></i>
+                                {% endif %}
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium">{{ message }}</p>
+                            </div>
                         </div>
-                        {% endfor %}
                     </div>
-                    {% endif %}
-                    
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <div class="form-group mb-4">
-                            <label for="id_old_password" class="form-label">Current Password</label>
-                            <input type="password" name="old_password" class="form-control" autocomplete="current-password" autofocus required id="id_old_password">
-                            {% if password_form.old_password.errors %}
-                            <div class="text-danger mt-2">
-                                {% for error in password_form.old_password.errors %}
-                                {{ error }}
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="form-group mb-4">
-                            <label for="id_new_password1" class="form-label">New Password</label>
-                            <input type="password" name="new_password1" class="form-control" autocomplete="new-password" required id="id_new_password1">
-                            {% if password_form.new_password1.errors %}
-                            <div class="text-danger mt-2">
-                                {% for error in password_form.new_password1.errors %}
-                                {{ error }}
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                            {% if password_form.new_password1.help_text %}
-                            <div class="form-text text-muted mt-2">
-                                <small>{{ password_form.new_password1.help_text|safe }}</small>
-                            </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="form-group mb-4">
-                            <label for="id_new_password2" class="form-label">Confirm New Password</label>
-                            <input type="password" name="new_password2" class="form-control" autocomplete="new-password" required id="id_new_password2">
-                            {% if password_form.new_password2.errors %}
-                            <div class="text-danger mt-2">
-                                {% for error in password_form.new_password2.errors %}
-                                {{ error }}
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Change Password</button>
-                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Cancel</a>
-                        </div>
-                    </form>
+                    {% endfor %}
                 </div>
+                {% endif %}
+                
+                <!-- Password Change Form -->
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Current Password -->
+                    <div class="space-y-2">
+                        <label for="id_old_password" class="block text-sm font-medium text-gray-700">Current Password</label>
+                        <input type="password" name="old_password" id="id_old_password" 
+                            class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                            autocomplete="current-password" autofocus required>
+                        {% if password_form.old_password.errors %}
+                        <div class="text-sm text-red-600">
+                            {% for error in password_form.old_password.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- New Password -->
+                    <div class="space-y-2">
+                        <label for="id_new_password1" class="block text-sm font-medium text-gray-700">New Password</label>
+                        <input type="password" name="new_password1" id="id_new_password1" 
+                            class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                            autocomplete="new-password" required>
+                        {% if password_form.new_password1.errors %}
+                        <div class="text-sm text-red-600">
+                            {% for error in password_form.new_password1.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if password_form.new_password1.help_text %}
+                        <div class="text-xs text-gray-500 mt-1">
+                            {{ password_form.new_password1.help_text|safe }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Confirm New Password -->
+                    <div class="space-y-2">
+                        <label for="id_new_password2" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                        <input type="password" name="new_password2" id="id_new_password2" 
+                            class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                            autocomplete="new-password" required>
+                        {% if password_form.new_password2.errors %}
+                        <div class="text-sm text-red-600">
+                            {% for error in password_form.new_password2.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="flex items-center space-x-4 pt-4">
+                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            Change Password
+                        </button>
+                        <a href="{% url 'admin_dashboard' %}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
