@@ -14,7 +14,11 @@ SECRET_KEY = 'django-insecure-kpd2@cuv#q5u9qub9ey5w-v(x4_-xk)w3oi9=evce$(=5r)g6m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# For production
+ALLOWED_HOSTS = ['realtime-awxx.onrender.com', 'localhost', '127.0.0.1']
+
+# Or if you want to allow all hosts (not recommended for production)
+# ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -163,4 +167,4 @@ if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Site URL for links in emails
-SITE_URL = 'http://localhost:8000'  # Change this in production
+SITE_URL = 'https://realtime-awxx.onrender.com'  # Change this in production
