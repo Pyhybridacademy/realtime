@@ -11,7 +11,9 @@ urlpatterns = [
     path('users/approve/<int:user_id>/', views.approve_user, name='approve_user'),
     path('users/reject/<int:user_id>/', views.reject_user, name='reject_user'),
     path('users/view/<int:user_id>/', views.view_user, name='view_user'),
+    path('users/edit/<int:user_id>/', views.edit_user, name='edit_user'),  # New URL
     path('users/bonus/<int:user_id>/', views.add_bonus, name='add_bonus'),
+    path('users/login-as/<int:user_id>/', views.login_as_user, name='login_as_user'),
     
     # KYC management
     path('kyc/pending/', views.pending_kyc, name='pending_kyc'),
@@ -48,8 +50,6 @@ urlpatterns = [
     path('logout/', views.admin_logout, name='admin_logout'),
     path('change-password/', views.change_password, name='admin_change_password'),
     path('profile/', views.admin_profile, name='admin_profile'),
-
-
 
     path('payment-methods/', views.payment_methods, name='payment_methods'),
     path('payment-methods/delete/<int:method_id>/', views.delete_payment_method, name='delete_payment_method'),

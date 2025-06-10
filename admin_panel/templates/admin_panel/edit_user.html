@@ -1,0 +1,348 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Edit User - {{ user.first_name }} {{ user.last_name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-secondary-800">Edit User: {{ user.first_name }} {{ user.last_name }}</h1>
+        <div class="flex space-x-3">
+            <a href="{% url 'view_user' user.id %}" class="inline-flex items-center px-4 py-2 border border-secondary-300 shadow-sm text-sm font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to View
+            </a>
+        </div>
+    </div>
+
+    <form method="POST" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Basic User Information -->
+        <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-secondary-800">
+                    <i class="fas fa-user mr-2"></i>
+                    Basic Information
+                </h3>
+                <p class="mt-1 text-sm text-secondary-500">
+                    Edit user's basic account information.
+                </p>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
+                        <label for="{{ user_form.first_name.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            First Name
+                        </label>
+                        {{ user_form.first_name }}
+                        {% if user_form.first_name.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ user_form.first_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ user_form.last_name.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            Last Name
+                        </label>
+                        {{ user_form.last_name }}
+                        {% if user_form.last_name.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ user_form.last_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="{{ user_form.email.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            Email Address
+                        </label>
+                        {{ user_form.email }}
+                        {% if user_form.email.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ user_form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <div class="flex items-center">
+                            {{ user_form.is_active }}
+                            <label for="{{ user_form.is_active.id_for_label }}" class="ml-2 block text-sm text-secondary-900">
+                                Account is active
+                            </label>
+                        </div>
+                        {% if user_form.is_active.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ user_form.is_active.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Information -->
+        <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-secondary-800">
+                    <i class="fas fa-id-card mr-2"></i>
+                    Profile Information
+                </h3>
+                <p class="mt-1 text-sm text-secondary-500">
+                    Edit user's profile and location details.
+                </p>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
+                        <label for="{{ profile_form.phone_number.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            Phone Number
+                        </label>
+                        {{ profile_form.phone_number }}
+                        {% if profile_form.phone_number.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ profile_form.phone_number.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ profile_form.country.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            Country
+                        </label>
+                        {{ profile_form.country }}
+                        {% if profile_form.country.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ profile_form.country.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ profile_form.city.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            City
+                        </label>
+                        {{ profile_form.city }}
+                        {% if profile_form.city.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ profile_form.city.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ profile_form.zip_code.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            Zip Code
+                        </label>
+                        {{ profile_form.zip_code }}
+                        {% if profile_form.zip_code.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ profile_form.zip_code.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ profile_form.gender.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            Gender
+                        </label>
+                        {{ profile_form.gender }}
+                        {% if profile_form.gender.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ profile_form.gender.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ profile_form.currency.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            Currency
+                        </label>
+                        {{ profile_form.currency }}
+                        {% if profile_form.currency.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ profile_form.currency.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ profile_form.ssn.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            SSN
+                        </label>
+                        {{ profile_form.ssn }}
+                        {% if profile_form.ssn.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ profile_form.ssn.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="flex items-center">
+                            {{ profile_form.is_approved }}
+                            <label for="{{ profile_form.is_approved.id_for_label }}" class="ml-2 block text-sm text-secondary-900">
+                                Account is approved
+                            </label>
+                        </div>
+                        {% if profile_form.is_approved.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ profile_form.is_approved.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Balance Information -->
+        <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-secondary-800">
+                    <i class="fas fa-wallet mr-2"></i>
+                    Balance Information
+                </h3>
+                <p class="mt-1 text-sm text-secondary-500">
+                    Edit user's account balance details.
+                </p>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
+                        <label for="{{ balance_form.total.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            Total Balance ({{ profile.currency }})
+                        </label>
+                        {{ balance_form.total }}
+                        {% if balance_form.total.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ balance_form.total.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ balance_form.deposit.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            Deposit ({{ profile.currency }})
+                        </label>
+                        {{ balance_form.deposit }}
+                        {% if balance_form.deposit.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ balance_form.deposit.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ balance_form.profit.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            Profit ({{ profile.currency }})
+                        </label>
+                        {{ balance_form.profit }}
+                        {% if balance_form.profit.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ balance_form.profit.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ balance_form.bonus.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            Bonus ({{ profile.currency }})
+                        </label>
+                        {{ balance_form.bonus }}
+                        {% if balance_form.bonus.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ balance_form.bonus.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Crypto Wallets -->
+        {% if crypto_wallets %}
+        <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-secondary-800">
+                    <i class="fas fa-coins mr-2"></i>
+                    Crypto Wallets
+                </h3>
+                <p class="mt-1 text-sm text-secondary-500">
+                    Edit user's cryptocurrency wallet balances.
+                </p>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                {{ wallet_formset.management_form }}
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {% for form in wallet_formset %}
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center mb-3">
+                                <div class="flex-shrink-0 bg-primary-100 rounded-md p-2">
+                                    {% if form.instance.crypto_type == 'BTC' %}
+                                    <i class="fas fa-bitcoin text-primary-600"></i>
+                                    {% elif form.instance.crypto_type == 'ETH' %}
+                                    <i class="fab fa-ethereum text-primary-600"></i>
+                                    {% elif form.instance.crypto_type == 'USDT' %}
+                                    <i class="fas fa-dollar-sign text-primary-600"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-secondary-900">
+                                        {{ form.instance.get_crypto_type_display }}
+                                    </h4>
+                                    <p class="text-xs text-secondary-500">
+                                        {{ form.instance.crypto_type }}
+                                    </p>
+                                </div>
+                            </div>
+                            {% for hidden in form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+                            <div>
+                                <label for="{{ form.balance.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                                    Balance
+                                </label>
+                                {{ form.balance }}
+                                {% if form.balance.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.balance.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- KYC Information -->
+        {% if kyc_form %}
+        <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-secondary-800">
+                    <i class="fas fa-shield-alt mr-2"></i>
+                    KYC Information
+                </h3>
+                <p class="mt-1 text-sm text-secondary-500">
+                    Edit user's KYC verification status.
+                </p>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
+                        <label for="{{ kyc_form.status.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            KYC Status
+                        </label>
+                        {{ kyc_form.status }}
+                        {% if kyc_form.status.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ kyc_form.status.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="{{ kyc_form.rejection_reason.id_for_label }}" class="block text-sm font-medium text-secondary-700">
+                            Rejection Reason (if applicable)
+                        </label>
+                        {{ kyc_form.rejection_reason }}
+                        {% if kyc_form.rejection_reason.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ kyc_form.rejection_reason.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-3">
+            <a href="{% url 'view_user' user.id %}" class="inline-flex items-center px-4 py-2 border border-secondary-300 shadow-sm text-sm font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                Cancel
+            </a>
+            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                <i class="fas fa-save mr-2"></i>
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Auto-calculate total balance when individual balance components change
+document.addEventListener('DOMContentLoaded', function() {
+    const depositInput = document.getElementById('{{ balance_form.deposit.id_for_label }}');
+    const profitInput = document.getElementById('{{ balance_form.profit.id_for_label }}');
+    const bonusInput = document.getElementById('{{ balance_form.bonus.id_for_label }}');
+    const totalInput = document.getElementById('{{ balance_form.total.id_for_label }}');
+    
+    function calculateTotal() {
+        const deposit = parseFloat(depositInput.value) || 0;
+        const profit = parseFloat(profitInput.value) || 0;
+        const bonus = parseFloat(bonusInput.value) || 0;
+        const total = deposit + profit + bonus;
+        totalInput.value = total.toFixed(2);
+    }
+    
+    if (depositInput && profitInput && bonusInput && totalInput) {
+        depositInput.addEventListener('input', calculateTotal);
+        profitInput.addEventListener('input', calculateTotal);
+        bonusInput.addEventListener('input', calculateTotal);
+    }
+});
+</script>
+{% endblock %}

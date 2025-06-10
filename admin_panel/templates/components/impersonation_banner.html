@@ -1,0 +1,16 @@
+{% if request.session.is_impersonating %}
+<div class="bg-yellow-500 text-white px-4 py-2 text-center relative">
+    <div class="flex items-center justify-center space-x-4">
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-user-secret"></i>
+            <span class="font-medium">
+                You are currently logged in as: {{ request.session.impersonated_user_email }}
+            </span>
+        </div>
+        <a href="{% url 'switch_back_to_admin' %}" class="inline-flex items-center px-3 py-1 border border-white text-sm font-medium rounded-md text-yellow-500 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white">
+            <i class="fas fa-sign-out-alt mr-1"></i>
+            Switch Back to Admin
+        </a>
+    </div>
+</div>
+{% endif %}

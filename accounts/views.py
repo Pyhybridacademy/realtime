@@ -8,9 +8,6 @@ from notifications.utils import create_notification
 from django.contrib.auth import logout
 from notifications.email_utils import notify_admin_new_account
 
-
-
-
 User = get_user_model()
 
 def home(request):
@@ -24,8 +21,6 @@ def home(request):
         context['is_approved'] = request.user.profile.is_approved if hasattr(request.user, 'profile') else False
     
     return render(request, 'accounts/home.html', context)
-
-
 
 def register_step1(request):
     """First step of registration - basic user information"""
@@ -247,6 +242,36 @@ def logout_view(request):
     messages.success(request, 'You have been successfully logged out.')
     return redirect('login')
 
+# Add the new switch_back_to_admin view
+@login_required
+def switch_back_to_admin(request):
+    """Allow admin to switch back to their original account"""
+    original_admin_id = request.session.get('original_admin_user_id')
+    
+    if not original_admin_id or not request.session.get('is_impersonating'):
+        messages.error(request, 'No admin session to switch back to.')
+        return redirect('home')
+    
+    try:
+        from django.contrib.auth import login
+        admin_user = User.objects.get(id=original_admin_id, is_staff=True)
+        
+        # Clear impersonation session data
+        del request.session['original_admin_user_id']
+        del request.session['is_impersonating']
+        if 'impersonated_user_email' in request.session:
+            del request.session['impersonated_user_email']
+        
+        # Login back as admin
+        login(request, admin_user, backend='django.contrib.auth.backends.ModelBackend')
+        
+        messages.success(request, 'You have switched back to your admin account.')
+        return redirect('admin_dashboard')
+        
+    except User.DoesNotExist:
+        messages.error(request, 'Original admin user not found.')
+        return redirect('home')
+
 def error_404(request, exception):
     """Handle 404 (Page Not Found) errors"""
     return render(request, 'errors/404.html', status=404)
@@ -262,5 +287,3 @@ def error_403(request, exception):
 def error_400(request, exception):
     """Handle 400 (Bad Request) errors"""
     return render(request, 'errors/400.html', status=400)
-
-

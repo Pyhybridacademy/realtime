@@ -5,152 +5,426 @@
 
 {% block content %}
 <div class="container mx-auto">
-    <h1 class="text-2xl font-semibold text-secondary-800 mb-4">Manage Users</h1>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-secondary-800">Manage Users</h1>
+        <div class="flex space-x-4">
+            <!-- Quick Stats -->
+            <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                Total: {{ total_users }}
+            </div>
+            <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                Approved: {{ approved_users }}
+            </div>
+            <div class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                Pending: {{ pending_users }}
+            </div>
+        </div>
+    </div>
     
     <!-- Search and Filter Card -->
     <div class="bg-white shadow-md rounded-lg mb-6">
         <div class="border-b border-gray-200 px-6 py-4">
-            <h2 class="text-lg font-medium text-primary-600">Search and Filter</h2>
+            <h2 class="text-lg font-medium text-primary-600">
+                <i class="fas fa-search mr-2"></i>
+                Search and Filter
+            </h2>
         </div>
         <div class="p-6">
-            <form method="get" class="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-12 gap-4" id="searchForm">
                 <div class="md:col-span-6">
-                    <label for="search" class="block text-sm font-medium text-secondary-700 mb-1">Search</label>
-                    <input type="text" id="search" name="search" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50" placeholder="Email, Phone, Country" value="{{ search_query }}">
+                    <label for="search" class="block text-sm font-medium text-secondary-700 mb-1">Search Users</label>
+                    <div class="relative">
+                        <input type="text" 
+                               id="search" 
+                               name="search" 
+                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50 pl-10" 
+                               placeholder="Search by email, name, phone, country, or city..." 
+                               value="{{ search_query }}"
+                               autocomplete="off">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        {% if search_query %}
+                        <button type="button" 
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                onclick="clearSearch()">
+                            <i class="fas fa-times text-gray-400 hover:text-gray-600"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">
+                        Search across email, name, phone number, country, and city
+                    </p>
                 </div>
                 <div class="md:col-span-4">
-                    <label for="status" class="block text-sm font-medium text-secondary-700 mb-1">Status</label>
-                    <select id="status" name="status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50">
-                        <option value="" {% if status_filter == '' %}selected{% endif %}>All</option>
-                        <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
-                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <label for="status" class="block text-sm font-medium text-secondary-700 mb-1">Account Status</label>
+                    <select id="status" 
+                            name="status" 
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 focus:ring-opacity-50"
+                            onchange="this.form.submit()">
+                        <option value="" {% if status_filter == '' %}selected{% endif %}>All Users</option>
+                        <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved Only</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending Only</option>
                     </select>
                 </div>
-                <div class="md:col-span-2 flex items-end">
-                    <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-150">
-                        Filter
+                <div class="md:col-span-2 flex items-end space-x-2">
+                    <button type="submit" 
+                            class="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-150 flex items-center justify-center">
+                        <i class="fas fa-search mr-2"></i>
+                        Search
                     </button>
+                    {% if search_query or status_filter %}
+                    <a href="{% url 'manage_users' %}" 
+                       class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-3 rounded-md transition-colors duration-150 flex items-center justify-center"
+                       title="Clear all filters">
+                        <i class="fas fa-times"></i>
+                    </a>
+                    {% endif %}
                 </div>
             </form>
         </div>
     </div>
     
+    <!-- Results Summary -->
+    {% if search_query or status_filter %}
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center">
+            <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+            <div class="text-sm text-blue-700">
+                <strong>{{ users.paginator.count }}</strong> user{{ users.paginator.count|pluralize }} found
+                {% if search_query %}
+                    matching "<strong>{{ search_query }}</strong>"
+                {% endif %}
+                {% if status_filter %}
+                    with status "<strong>{{ status_filter|title }}</strong>"
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
     <!-- Users Table Card -->
     <div class="bg-white shadow-md rounded-lg">
         <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-            <h2 class="text-lg font-medium text-primary-600">Users</h2>
+            <h2 class="text-lg font-medium text-primary-600">
+                <i class="fas fa-users mr-2"></i>
+                Users
+                <span class="text-sm text-gray-500 font-normal">
+                    ({{ users.start_index }}-{{ users.end_index }} of {{ users.paginator.count }})
+                </span>
+            </h2>
             <div class="relative" x-data="{ open: false }">
-                <button @click="open = !open" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                <button @click="open = !open" 
+                        class="text-gray-500 hover:text-gray-700 focus:outline-none p-2 rounded-md hover:bg-gray-100">
                     <i class="fas fa-ellipsis-v"></i>
                 </button>
-                <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                    <div class="px-4 py-2 text-xs text-gray-500">Export Options:</div>
-                    <a href="#" class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100">Export CSV</a>
-                    <a href="#" class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100">Export Excel</a>
+                <div x-show="open" 
+                     @click.away="open = false" 
+                     class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border">
+                    <div class="px-4 py-2 text-xs text-gray-500 border-b">Export Options:</div>
+                    <a href="#" class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100 flex items-center">
+                        <i class="fas fa-file-csv mr-2"></i>
+                        Export CSV
+                    </a>
+                    <a href="#" class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-100 flex items-center">
+                        <i class="fas fa-file-excel mr-2"></i>
+                        Export Excel
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="p-6">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead>
-                        <tr>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Country</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for user in users %}
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.email }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.first_name }} {{ user.last_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.profile.country.name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.profile.phone_number }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {% if user.profile.is_approved %}
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    Approved
-                                </span>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <div class="flex items-center">
+                                <i class="fas fa-envelope mr-2"></i>
+                                Email
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <div class="flex items-center">
+                                <i class="fas fa-user mr-2"></i>
+                                Name
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <div class="flex items-center">
+                                <i class="fas fa-globe mr-2"></i>
+                                Location
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <div class="flex items-center">
+                                <i class="fas fa-phone mr-2"></i>
+                                Phone
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Status
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar mr-2"></i>
+                                Joined
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <div class="flex items-center">
+                                <i class="fas fa-cog mr-2"></i>
+                                Actions
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for user in users %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ user.email }}</div>
+                            {% if not user.is_active %}
+                            <div class="text-xs text-red-500">
+                                <i class="fas fa-ban mr-1"></i>Inactive
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ user.first_name }} {{ user.last_name }}</div>
+                            <div class="text-xs text-gray-500">ID: {{ user.id }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">
+                                {% if user.profile.country %}
+                                    <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
+                                    {{ user.profile.country.name }}
                                 {% else %}
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    Pending
-                                </span>
+                                    <span class="text-gray-400">Not specified</span>
                                 {% endif %}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.date_joined|date:"M d, Y" }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <div class="flex space-x-2">
-                                    <a href="{% url 'view_user' user.id %}" class="text-primary-600 hover:text-primary-900">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    {% if not user.profile.is_approved %}
-                                    <a href="{% url 'approve_user' user.id %}" class="text-green-600 hover:text-green-900">
-                                        <i class="fas fa-check"></i>
-                                    </a>
-                                    <a href="{% url 'reject_user' user.id %}" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to reject and delete this user?')">
-                                        <i class="fas fa-times"></i>
-                                    </a>
+                            </div>
+                            {% if user.profile.city %}
+                            <div class="text-xs text-gray-500">{{ user.profile.city }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">
+                                {% if user.profile.phone_number %}
+                                    {{ user.profile.phone_number }}
+                                {% else %}
+                                    <span class="text-gray-400">Not provided</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if user.profile.is_approved %}
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                <i class="fas fa-check mr-1"></i>
+                                Approved
+                            </span>
+                            {% else %}
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-clock mr-1"></i>
+                                Pending
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ user.date_joined|date:"M d, Y" }}</div>
+                            <div class="text-xs text-gray-500">{{ user.date_joined|timesince }} ago</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <div class="flex space-x-2">
+                                <a href="{% url 'view_user' user.id %}" 
+                                   class="text-primary-600 hover:text-primary-900 p-1 rounded hover:bg-primary-50"
+                                   title="View User Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'edit_user' user.id %}" 
+                                   class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
+                                   title="Edit User">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if not user.profile.is_approved %}
+                                <a href="{% url 'approve_user' user.id %}" 
+                                   class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
+                                   title="Approve User">
+                                    <i class="fas fa-check"></i>
+                                </a>
+                                <a href="{% url 'reject_user' user.id %}" 
+                                   class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50" 
+                                   onclick="return confirm('Are you sure you want to reject and delete this user?')"
+                                   title="Reject User">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center">
+                            <div class="text-gray-400">
+                                <i class="fas fa-users text-4xl mb-4"></i>
+                                <div class="text-lg font-medium text-gray-900 mb-2">No users found</div>
+                                <div class="text-sm">
+                                    {% if search_query or status_filter %}
+                                        Try adjusting your search criteria or 
+                                        <a href="{% url 'manage_users' %}" class="text-primary-600 hover:text-primary-800">clear all filters</a>
+                                    {% else %}
+                                        No users have registered yet.
                                     {% endif %}
                                 </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No users found</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination -->
-            {% if users.has_other_pages %}
-            <div class="flex justify-center mt-6">
-                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    {% if users.has_previous %}
-                    <a href="?page={{ users.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <span class="sr-only">Previous</span>
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                    {% else %}
-                    <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
-                        <span class="sr-only">Previous</span>
-                        <i class="fas fa-chevron-left"></i>
-                    </span>
-                    {% endif %}
-                    
-                    {% for i in users.paginator.page_range %}
-                        {% if users.number == i %}
-                        <span class="relative inline-flex items-center px-4 py-2 border border-primary-500 bg-primary-50 text-sm font-medium text-primary-600">
-                            {{ i }}
-                        </span>
-                        {% else %}
-                        <a href="?page={{ i }}&search={{ search_query }}&status={{ status_filter }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                            {{ i }}
-                        </a>
-                        {% endif %}
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
-                    
-                    {% if users.has_next %}
-                    <a href="?page={{ users.next_page_number }}&search={{ search_query }}&status={{ status_filter }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <span class="sr-only">Next</span>
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                    {% else %}
-                    <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
-                        <span class="sr-only">Next</span>
-                        <i class="fas fa-chevron-right"></i>
-                    </span>
-                    {% endif %}
-                </nav>
-            </div>
-            {% endif %}
+                </tbody>
+            </table>
         </div>
+        
+        <!-- Pagination -->
+        {% if users.has_other_pages %}
+        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+            <div class="flex items-center justify-between">
+                <div class="flex-1 flex justify-between sm:hidden">
+                    {% if users.has_previous %}
+                    <a href="?page={{ users.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}" 
+                       class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Previous
+                    </a>
+                    {% endif %}
+                    {% if users.has_next %}
+                    <a href="?page={{ users.next_page_number }}&search={{ search_query }}&status={{ status_filter }}" 
+                       class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Next
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Showing <span class="font-medium">{{ users.start_index }}</span> to 
+                            <span class="font-medium">{{ users.end_index }}</span> of 
+                            <span class="font-medium">{{ users.paginator.count }}</span> results
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            {% if users.has_previous %}
+                            <a href="?page={{ users.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}" 
+                               class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Previous</span>
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                            {% else %}
+                            <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                                <span class="sr-only">Previous</span>
+                                <i class="fas fa-chevron-left"></i>
+                            </span>
+                            {% endif %}
+                            
+                            {% for i in users.paginator.page_range %}
+                                {% if users.number == i %}
+                                <span class="relative inline-flex items-center px-4 py-2 border border-primary-500 bg-primary-50 text-sm font-medium text-primary-600">
+                                    {{ i }}
+                                </span>
+                                {% elif i > users.number|add:'-3' and i < users.number|add:'3' %}
+                                <a href="?page={{ i }}&search={{ search_query }}&status={{ status_filter }}" 
+                                   class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    {{ i }}
+                                </a>
+                                {% elif i == 1 or i == users.paginator.num_pages %}
+                                <a href="?page={{ i }}&search={{ search_query }}&status={{ status_filter }}" 
+                                   class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    {{ i }}
+                                </a>
+                                {% elif i == users.number|add:'-4' or i == users.number|add:'4' %}
+                                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                                    ...
+                                </span>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if users.has_next %}
+                            <a href="?page={{ users.next_page_number }}&search={{ search_query }}&status={{ status_filter }}" 
+                               class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Next</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            {% else %}
+                            <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                                <span class="sr-only">Next</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                            {% endif %}
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
+
+<script>
+// Auto-submit form when status changes
+document.getElementById('status').addEventListener('change', function() {
+    document.getElementById('searchForm').submit();
+});
+
+// Clear search function
+function clearSearch() {
+    document.getElementById('search').value = '';
+    document.getElementById('searchForm').submit();
+}
+
+// Real-time search with debounce
+let searchTimeout;
+document.getElementById('search').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() {
+        // Optional: Auto-submit after 1 second of no typing
+        // document.getElementById('searchForm').submit();
+    }, 1000);
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Focus search on Ctrl+F or Cmd+F
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        document.getElementById('search').focus();
+    }
+});
+
+// Highlight search terms in results
+document.addEventListener('DOMContentLoaded', function() {
+    const searchQuery = '{{ search_query|escapejs }}';
+    if (searchQuery) {
+        highlightSearchTerms(searchQuery);
+    }
+});
+
+function highlightSearchTerms(query) {
+    const terms = query.toLowerCase().split(' ');
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    tableRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+            let content = cell.innerHTML;
+            terms.forEach(term => {
+                if (term.length > 2) {
+                    const regex = new RegExp(`(${term})`, 'gi');
+                    content = content.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
+                }
+            });
+            cell.innerHTML = content;
+        });
+    });
+}
+</script>
 {% endblock %}

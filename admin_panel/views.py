@@ -15,7 +15,7 @@ from wallet.models import Bank, CryptoWallet, Card
 from notifications.utils import create_notification
 from datetime import datetime, timedelta
 from .models import SystemSettings
-from .forms import SystemSettingsForm
+from .forms import SystemSettingsForm, AdminEditUserForm, AdminEditProfileForm, AdminEditBalanceForm, AdminEditKYCForm, AdminEditCryptoWalletForm
 from decimal import Decimal
 from notifications.email_utils import (
     notify_user_account_approved,
@@ -28,6 +28,13 @@ from django.contrib.auth import logout
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from django.db import transaction
+from django.forms import modelformset_factory
+
+# Add these imports at the top of your views.py file
+from django.contrib.auth import login
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 @login_required
 def admin_logout(request):
@@ -847,19 +854,39 @@ def add_bonus(request, user_id):
 @login_required
 @user_passes_test(is_admin)
 def manage_users(request):
-    """View for managing all users"""
-    search_query = request.GET.get('search', '')
+    """Admin view to manage all users with search and filtering"""
+    # Get search and filter parameters
+    search_query = request.GET.get('search', '').strip()
     status_filter = request.GET.get('status', '')
     
-    users = User.objects.filter(is_staff=False)
+    # Start with all non-staff users
+    users = User.objects.filter(is_staff=False).select_related('profile')
     
     # Apply search filter
     if search_query:
-        users = users.filter(
-            Q(email__icontains=search_query) | 
+        # Create a base query for non-country fields
+        base_query = (
+            Q(email__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
             Q(profile__phone_number__icontains=search_query) |
-            Q(profile__country__icontains=search_query)
+            Q(profile__city__icontains=search_query) |
+            Q(profile__country__icontains=search_query)  # Search by country code
         )
+        
+        # Try to find country codes that match the search query
+        from django_countries import countries
+        matching_country_codes = []
+        for code, name in countries:
+            if search_query.lower() in name.lower():
+                matching_country_codes.append(code)
+        
+        # Add country name search if we found matching codes
+        if matching_country_codes:
+            country_query = Q(profile__country__in=matching_country_codes)
+            users = users.filter(base_query | country_query)
+        else:
+            users = users.filter(base_query)
     
     # Apply status filter
     if status_filter == 'approved':
@@ -867,15 +894,26 @@ def manage_users(request):
     elif status_filter == 'pending':
         users = users.filter(profile__is_approved=False)
     
-    # Paginate results
+    # Order by date joined (newest first)
+    users = users.order_by('-date_joined')
+    
+    # Pagination
     paginator = Paginator(users, 20)  # Show 20 users per page
     page_number = request.GET.get('page')
     users_page = paginator.get_page(page_number)
     
+    # Statistics for dashboard
+    total_users = User.objects.filter(is_staff=False).count()
+    approved_users = User.objects.filter(is_staff=False, profile__is_approved=True).count()
+    pending_users = User.objects.filter(is_staff=False, profile__is_approved=False).count()
+    
     context = {
         'users': users_page,
         'search_query': search_query,
-        'status_filter': status_filter
+        'status_filter': status_filter,
+        'total_users': total_users,
+        'approved_users': approved_users,
+        'pending_users': pending_users,
     }
     
     return render(request, 'admin_panel/manage_users.html', context)
@@ -1682,3 +1720,201 @@ def delete_plan(request, plan_type, plan_id):
     plan.delete()
     messages.success(request, f'{plan_type.replace("_", " ").title()} plan "{plan_name}" deleted successfully.')
     return redirect('manage_plans')
+
+@login_required
+@user_passes_test(is_admin)
+def login_as_user(request, user_id):
+    """Allow admin to login as a specific user"""
+    if not request.user.is_staff:
+        messages.error(request, 'You do not have permission to perform this action.')
+        return redirect('admin_dashboard')
+    
+    try:
+        target_user = User.objects.get(id=user_id, is_staff=False)
+        
+        # Store the original admin user ID in session so they can switch back
+        request.session['original_admin_user_id'] = request.user.id
+        request.session['is_impersonating'] = True
+        request.session['impersonated_user_email'] = target_user.email
+        
+        # Login as the target user
+        login(request, target_user, backend='django.contrib.auth.backends.ModelBackend')
+        
+        messages.success(request, f'You are now logged in as {target_user.email}. You can switch back anytime.')
+        
+        # Redirect to the user's dashboard
+        return redirect('dashboard')
+        
+    except User.DoesNotExist:
+        messages.error(request, 'User not found.')
+        return redirect('view_user', user_id=user_id)
+
+@login_required
+def switch_back_to_admin(request):
+    """Allow admin to switch back to their original account"""
+    original_admin_id = request.session.get('original_admin_user_id')
+    
+    if not original_admin_id or not request.session.get('is_impersonating'):
+        messages.error(request, 'No admin session to switch back to.')
+        return redirect('home')
+    
+    try:
+        admin_user = User.objects.get(id=original_admin_id, is_staff=True)
+        
+        # Clear impersonation session data
+        del request.session['original_admin_user_id']
+        del request.session['is_impersonating']
+        if 'impersonated_user_email' in request.session:
+            del request.session['impersonated_user_email']
+        
+        # Login back as admin
+        login(request, admin_user, backend='django.contrib.auth.backends.ModelBackend')
+        
+        messages.success(request, 'You have switched back to your admin account.')
+        return redirect('admin_dashboard')
+        
+    except User.DoesNotExist:
+        messages.error(request, 'Original admin user not found.')
+        return redirect('home')
+
+@login_required
+@user_passes_test(is_admin)
+def edit_user(request, user_id):
+    """Admin view to edit user details comprehensively"""
+    user = get_object_or_404(User, id=user_id, is_staff=False)
+    
+    # Get or create related objects
+    profile = user.profile
+    try:
+        balance = Balance.objects.get(user=user)
+    except Balance.DoesNotExist:
+        balance = Balance.objects.create(user=user, total=0, deposit=0, profit=0, bonus=0)
+    
+    try:
+        kyc = KYC.objects.get(user=user)
+    except KYC.DoesNotExist:
+        kyc = None
+    
+    # Get crypto wallets
+    crypto_wallets = CryptoWallet.objects.filter(user=user)
+    
+    # Create formset for crypto wallets
+    CryptoWalletFormSet = modelformset_factory(
+        CryptoWallet, 
+        form=AdminEditCryptoWalletForm, 
+        extra=0,
+        can_delete=False
+    )
+    
+    if request.method == 'POST':
+        # Initialize forms with POST data
+        user_form = AdminEditUserForm(request.POST, instance=user)
+        profile_form = AdminEditProfileForm(request.POST, instance=profile)
+        balance_form = AdminEditBalanceForm(request.POST, instance=balance)
+        kyc_form = AdminEditKYCForm(request.POST, instance=kyc) if kyc else None
+        wallet_formset = CryptoWalletFormSet(request.POST, queryset=crypto_wallets)
+        
+        # Validate all forms
+        forms_valid = all([
+            user_form.is_valid(),
+            profile_form.is_valid(),
+            balance_form.is_valid(),
+            kyc_form.is_valid() if kyc_form else True,
+            wallet_formset.is_valid()
+        ])
+        
+        if forms_valid:
+            try:
+                with transaction.atomic():
+                    # Track changes for audit log
+                    changes = []
+                    
+                    # Save user form and track changes
+                    if user_form.has_changed():
+                        old_values = {field: getattr(user, field) for field in user_form.changed_data}
+                        user_instance = user_form.save()
+                        for field in user_form.changed_data:
+                            changes.append(f"User {field}: {old_values[field]} → {getattr(user_instance, field)}")
+                    
+                    # Save profile form and track changes
+                    if profile_form.has_changed():
+                        old_values = {field: getattr(profile, field) for field in profile_form.changed_data}
+                        profile_instance = profile_form.save()
+                        for field in profile_form.changed_data:
+                            old_value = old_values[field]
+                            new_value = getattr(profile_instance, field)
+                            if field == 'country':
+                                old_value = old_value.name if old_value else 'None'
+                                new_value = new_value.name if new_value else 'None'
+                            changes.append(f"Profile {field}: {old_value} → {new_value}")
+                    
+                    # Save balance form and track changes
+                    if balance_form.has_changed():
+                        old_values = {field: getattr(balance, field) for field in balance_form.changed_data}
+                        balance_instance = balance_form.save()
+                        for field in balance_form.changed_data:
+                            changes.append(f"Balance {field}: {old_values[field]} → {getattr(balance_instance, field)}")
+                    
+                    # Save KYC form and track changes
+                    if kyc_form and kyc_form.has_changed():
+                        old_values = {field: getattr(kyc, field) for field in kyc_form.changed_data}
+                        kyc_instance = kyc_form.save()
+                        for field in kyc_form.changed_data:
+                            changes.append(f"KYC {field}: {old_values[field]} → {getattr(kyc_instance, field)}")
+                    
+                    # Save wallet formset and track changes
+                    if wallet_formset.has_changed():
+                        for form in wallet_formset:
+                            if form.has_changed():
+                                wallet = form.instance
+                                old_balance = wallet.balance
+                                wallet_instance = form.save()
+                                changes.append(f"Wallet {wallet.crypto_type} balance: {old_balance} → {wallet_instance.balance}")
+                    
+                    # Create audit log activity
+                    if changes:
+                        change_summary = "; ".join(changes)
+                        Activity.objects.create(
+                            user=user,
+                            activity_type='other',
+                            description=f'Account details updated by admin {request.user.email}: {change_summary}'
+                        )
+                        
+                        # Create notification for user
+                        create_notification(
+                            user,
+                            'account_update',
+                            'Account Updated',
+                            'Your account details have been updated by an administrator.'
+                        )
+                        
+                        messages.success(request, f'User details for {user.email} have been updated successfully.')
+                    else:
+                        messages.info(request, 'No changes were made.')
+                    
+                    return redirect('view_user', user_id=user.id)
+                    
+            except Exception as e:
+                messages.error(request, f'An error occurred while updating user details: {str(e)}')
+    else:
+        # Initialize forms with current data
+        user_form = AdminEditUserForm(instance=user)
+        profile_form = AdminEditProfileForm(instance=profile)
+        balance_form = AdminEditBalanceForm(instance=balance)
+        kyc_form = AdminEditKYCForm(instance=kyc) if kyc else None
+        wallet_formset = CryptoWalletFormSet(queryset=crypto_wallets)
+    
+    context = {
+        'user': user,
+        'profile': profile,
+        'balance': balance,
+        'kyc': kyc,
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'balance_form': balance_form,
+        'kyc_form': kyc_form,
+        'wallet_formset': wallet_formset,
+        'crypto_wallets': crypto_wallets,
+    }
+    
+    return render(request, 'admin_panel/edit_user.html', context)

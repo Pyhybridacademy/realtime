@@ -12,6 +12,9 @@ urlpatterns = [
     path('settings/', views.settings, name='settings'),
     path('kyc/', views.kyc_submission, name='kyc_submission'),
     
+    # Add the switch back URL
+    path('switch-back-to-admin/', views.switch_back_to_admin, name='switch_back_to_admin'),
+    
     # Password reset URLs
     path('password-reset/', 
          auth_views.PasswordResetView.as_view(
