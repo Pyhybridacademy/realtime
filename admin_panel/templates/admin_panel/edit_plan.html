@@ -2,11 +2,11 @@
 {% load admin_filters %}
 {% block content %}
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Edit {{ plan_type|replace:"_"," "|title }} Plan</h1>
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Edit {{ plan_type|replace:"_, "|title }} Plan</h1>
     
     {% if messages %}
         {% for message in messages %}
-            <div class="mt-4 p-4 {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} rounded">
+            <div class="mt-4 p-4 {% if message.tags == 'error' %}bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200{% else %}bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200{% endif %} rounded">
                 {{ message }}
             </div>
         {% endfor %}
@@ -27,7 +27,7 @@
                     </div>
                     <div>
                         <label for="cost" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cost (USDT)</label>
-                        <input type="number" step="0.00000001" name="cost" id="cost" value="{{ plan.cost }}" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                        <input type="number" step="0.01" name="cost" id="cost" value="{{ plan.cost }}" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                     </div>
                     <div>
                         <label for="duration_days" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Duration (Days)</label>
