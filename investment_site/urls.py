@@ -13,6 +13,7 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('wallet/', include('wallet.urls')),
     path('admin-panel/', include('admin_panel.urls')),
+    path('user-actions/', include('user_actions.urls')),
     path('notifications/', include('notifications.urls')),
     path('transactions/', include('transactions.urls')),
     

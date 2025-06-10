@@ -53,4 +53,13 @@ urlpatterns = [
 
     path('payment-methods/', views.payment_methods, name='payment_methods'),
     path('payment-methods/delete/<int:method_id>/', views.delete_payment_method, name='delete_payment_method'),
+
+    path('user-actions/', views.manage_user_actions, name='manage_user_actions'),
+    path('user-actions/assign/<int:user_id>/', views.assign_action, name='assign_action'),
+    path('user-actions/approve/<int:action_id>/', views.approve_action_deposit, name='approve_action_deposit'),
+    path('user-actions/reject/<int:action_id>/', views.reject_action_deposit, name='reject_action_deposit'),
+    path('plans/', views.manage_plans, name='manage_plans'),
+    path('plans/add/<str:plan_type>/', views.add_plan, name='add_plan'),
+    path('plans/edit/<str:plan_type>/<int:plan_id>/', views.edit_plan, name='edit_plan'),
+    path('plans/delete/<str:plan_type>/<int:plan_id>/', views.delete_plan, name='delete_plan'),
 ]

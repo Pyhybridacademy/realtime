@@ -7,6 +7,7 @@ from .models import CryptoWallet, Bank, Card
 from .forms import DepositForm, WithdrawalForm, BankForm, CardForm
 from transactions.models import Transaction
 from notifications.utils import create_notification
+from user_actions.models import UserAction
 from admin_panel.utils import get_exchange_rates, convert_crypto_to_fiat, convert_fiat_to_crypto
 from notifications.email_utils import notify_admin_deposit, notify_admin_withdrawal
 
@@ -75,18 +76,30 @@ def wallet_overview(request):
 
 
 @login_required
-def deposit(request, wallet_id):
-    """Deposit to wallet view"""
+def deposit(request, wallet_id, action_id=None):
+    """Deposit to wallet view, optionally linked to a user action"""
     if not request.user.profile.is_approved and not request.user.is_staff:
+        messages.warning(request, 'Your account is awaiting approval.')
         return redirect('awaiting_approval')
     
     wallet = get_object_or_404(CryptoWallet, id=wallet_id, user=request.user)
+    action = None
+    if action_id:
+        action = get_object_or_404(UserAction, id=action_id, user=request.user, status='pending')
+        if wallet.crypto_type != 'USDT':  # Assuming actions require USDT
+            messages.error(request, f'Please select a USDT wallet for {action.get_action_type_display()} deposits.')
+            return redirect('wallet_overview')
     
     if request.method == 'POST':
         form = DepositForm(request.POST, request.FILES)
         if form.is_valid():
             amount = form.cleaned_data['amount']
             screenshot = form.cleaned_data['screenshot']
+            
+            # Validate amount for actions
+            if action and amount != action.amount:
+                messages.error(request, f'Amount must be exactly {action.amount} USDT for {action.get_action_type_display()}.')
+                return redirect('deposit', wallet_id=wallet_id, action_id=action_id)
             
             # Create transaction record
             transaction = Transaction.objects.create(
@@ -99,6 +112,11 @@ def deposit(request, wallet_id):
                 screenshot=screenshot
             )
             
+            # Link transaction to user action if applicable
+            if action:
+                action.transaction = transaction
+                action.save()
+            
             # Create notification for admin
             admin_users = User.objects.filter(is_staff=True)
             for admin in admin_users:
@@ -106,7 +124,7 @@ def deposit(request, wallet_id):
                     admin,
                     'deposit',
                     'New Deposit Request',
-                    f'User {request.user.email} has submitted a deposit request for {amount} {wallet.crypto_type}.'
+                    f'User {request.user.email} has submitted a deposit request for {amount} {wallet.crypto_type}{" for " + action.get_action_type_display() if action else ""}.'
                 )
             
             # Create notification for user
@@ -114,21 +132,22 @@ def deposit(request, wallet_id):
                 request.user,
                 'deposit',
                 'Deposit Request Submitted',
-                f'Your deposit request for {amount} {wallet.crypto_type} has been submitted and is pending approval.'
+                f'Your deposit request for {amount} {wallet.crypto_type}{" for " + action.get_action_type_display() if action else ""} has been submitted and is pending approval.'
             )
             
             # Send email notification to admin
-            from notifications.email_utils import notify_admin_deposit
             notify_admin_deposit(transaction)
             
             messages.success(request, f'Your deposit request for {amount} {wallet.crypto_type} has been submitted and is pending approval.')
             return redirect('wallet_overview')
     else:
-        form = DepositForm()
+        initial_data = {'amount': action.amount} if action else {}
+        form = DepositForm(initial=initial_data)
     
     context = {
         'wallet': wallet,
-        'form': form
+        'form': form,
+        'action': action,
     }
     
     return render(request, 'wallet/deposit.html', context)

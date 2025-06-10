@@ -1,8 +1,37 @@
 {% extends "dash_base.html" %}
-
+{% load dashboard_tags %}
 {% block content %}
 <!-- Main Content -->
 <div class="flex-1 p-4 md:p-6 mt-0 md:mt-0">
+
+<!-- Action Alerts -->
+{% get_pending_user_actions request.user as pending_actions %}
+{% if pending_actions %}
+    <div class="mt-6 bg-red-100 dark:bg-red-900 border-l-4 border-red-500 text-red-700 dark:text-red-200 p-4">
+        <p class="font-bold text-lg">Urgent: Required Actions</p>
+        <p class="mt-2">You must complete the following actions to access other features.</p>
+        {% get_usdt_wallet request.user as usdt_wallet %}
+        {% for action in pending_actions %}
+            <p class="mt-2">
+                You are required to deposit {{ action.amount }} USDT for {{ action.get_action_type_display }}
+                {% if action.account_upgrade_plan %}
+                    ({{ action.account_upgrade_plan.name }})
+                {% elif action.signal_plan %}
+                    ({{ action.signal_plan.name }})
+                {% else %}
+                    (No plan specified)
+                {% endif %}.
+                {% if usdt_wallet %}
+                    <a href="{% url 'deposit' wallet_id=usdt_wallet.id action_id=action.id %}" class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-600 font-semibold">Deposit Now</a>
+                {% else %}
+                    <span class="text-red-600 dark:text-red-400">Please create a USDT wallet to proceed.</span>
+                    <a href="{% url 'wallet_overview' %}" class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-600">Create Wallet</a>
+                {% endif %}
+            </p>
+        {% endfor %}
+    </div>
+{% endif %}
+
     <div class="max-w-6xl mx-auto">
         <div class="flex flex-col lg:flex-row gap-6">
             <!-- Left Content Column -->

@@ -1,0 +1,94 @@
+{% extends 'admin_panel/base.html' %}
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Assign Action to {{ user.email }}</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mt-4 p-4 {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} rounded">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="mt-6 bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <form method="post" id="assign-action-form">
+                {% csrf_token %}
+                <div class="space-y-6">
+                    <div>
+                        <label for="action_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Action Type</label>
+                        <select name="action_type" id="action_type" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                            <option value="account_upgrade">Account Upgrade</option>
+                            <option value="signal">Signal Purchase</option>
+                        </select>
+                    </div>
+                    <div id="account_upgrade_plans" class="space-y-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Account Upgrade Plans</label>
+                        {% for plan in account_upgrade_plans %}
+                            <div class="flex items-center">
+                                <input type="radio" name="plan_id" id="account_upgrade_{{ plan.id }}" value="{{ plan.id }}" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600">
+                                <label for="account_upgrade_{{ plan.id }}" class="ml-3 text-sm text-gray-700 dark:text-gray-300">{{ plan.name }} ({{ plan.cost }} USDT, {{ plan.duration_days }} days)</label>
+                            </div>
+                        {% empty %}
+                            <p class="text-sm text-gray-500 dark:text-gray-400">No account upgrade plans available.</p>
+                        {% endfor %}
+                    </div>
+                    <div id="signal_plans" class="space-y-4 hidden">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Signal Plans</label>
+                        {% for plan in signal_plans %}
+                            <div class="flex items-center">
+                                <input type="radio" name="plan_id" id="signal_{{ plan.id }}" value="{{ plan.id }}" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600">
+                                <label for="signal_{{ plan.id }}" class="ml-3 text-sm text-gray-700 dark:text-gray-300">{{ plan.name }} ({{ plan.cost }} USDT, {{ plan.duration_days }} days)</label>
+                            </div>
+                        {% empty %}
+                            <p class="text-sm text-gray-500 dark:text-gray-400">No signal plans available.</p>
+                        {% endfor %}
+                    </div>
+                    {% if form_errors %}
+                        <div class="text-red-600 text-sm">Please select a plan before submitting.</div>
+                    {% endif %}
+                    <div>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50" disabled>
+                            Assign Action
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('action_type').addEventListener('change', function() {
+    const accountPlans = document.getElementById('account_upgrade_plans');
+    const signalPlans = document.getElementById('signal_plans');
+    const submitButton = document.querySelector('button[type="submit"]');
+    
+    if (this.value === 'account_upgrade') {
+        accountPlans.classList.remove('hidden');
+        signalPlans.classList.add('hidden');
+        document.querySelectorAll('#signal_plans input').forEach(input => input.checked = false);
+    } else {
+        accountPlans.classList.add('hidden');
+        signalPlans.classList.remove('hidden');
+        document.querySelectorAll('#account_upgrade_plans input').forEach(input => input.checked = false);
+    }
+    // Disable submit button until a plan is selected
+    submitButton.disabled = !document.querySelector('input[name="plan_id"]:checked');
+});
+
+// Enable/disable submit button based on plan selection
+document.querySelectorAll('input[name="plan_id"]').forEach(input => {
+    input.addEventListener('change', function() {
+        document.querySelector('button[type="submit"]').disabled = !document.querySelector('input[name="plan_id"]:checked');
+    });
+});
+
+// Initialize button state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const submitButton = document.querySelector('button[type="submit"]');
+    submitButton.disabled = !document.querySelector('input[name="plan_id"]:checked');
+});
+</script>
+{% endblock %}

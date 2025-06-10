@@ -1,0 +1,121 @@
+{% extends 'admin_panel/base.html' %}
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Manage User Actions</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mt-4 p-4 {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} rounded">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <!-- Assign Action Form -->
+    <div class="mt-6 bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white">Assign New Action</h2>
+            <form method="get" action="{% url 'assign_action' 0 %}" id="assign-action-form">
+                <div class="mt-4 flex items-end space-x-4">
+                    <div class="flex-1">
+                        <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Select User</label>
+                        <select name="user_id" id="user_id" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                            <option value="">-- Select a user --</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.email }} ({{ user.first_name }} {{ user.last_name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50" disabled>
+                        Assign Action
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- User Actions Table -->
+    <div class="mt-6">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8">
+                <a href="?tab=pending" class="{% if active_tab == 'pending' %}border-primary-500 text-primary-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} px-1 py-4 text-sm font-medium">
+                    Pending ({{ pending_count }})
+                </a>
+                <a href="?tab=completed" class="{% if active_tab == 'completed' %}border-primary-500 text-primary-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} px-1 py-4 text-blue-white">
+                    Completed ({{ completed_count }})
+                </a>
+            </nav>
+        </div>
+        
+        <div class="mt-6 bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">User</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">Action Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Plan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for action in actions %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ action.user.email }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ action.get_action_type_display }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                {% if action.action_type == 'account_upgrade' %}
+                                    {{ action.account_upgrade_plan.name }}
+                                {% else %}
+                                    {{ action.signal_plan.name }}
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ action.amount }} USDT</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ action.get_status_display }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                {% if action.status == 'pending' %}
+                                    <a href="{% url 'approve_action_deposit' action.id %}" class="text-green-600 hover:text-green-900">Approve</a>
+                                    <a href="{% url 'reject_action_deposit' action.id %}" class="ml-4 text-red-600 hover:text-red-900">Reject</a>
+                                    <a href="{% url 'assign_action' action.user.id %}" class="ml-4 text-blue-600 hover:text-blue-900">Assign Action</a>
+                                {% else %}
+                                    <a href="{% url 'assign_action' action.user.id %}" class="text-blue-600 hover:text-blue-900">Assign Action</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">No actions found. Use the form above to assign a new action to a user.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if actions.has_other_pages %}
+                <div class="px-6 py-4">
+                    {% if actions.has_previous %}
+                        <a href="?page={{ actions.previous_page_number }}&tab={{ active_tab }}" class="text-primary-600 hover:text-primary-900">Previous</a>
+                    {% endif %}
+                    <span class="mx-4">Page {{ actions.number }} of {{ actions.paginator.num_pages }}</span>
+                    {% if actions.has_next %}
+                        <a href="?page={{ actions.next_page_number }}&tab={{ active_tab }}" class="text-primary-600 hover:text-primary-900">Next</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('user_id').addEventListener('change', function() {
+    const button = document.querySelector('button[type="submit"]');
+    button.disabled = !this.value;
+    if (this.value) {
+        const form = document.getElementById('assign-action-form');
+        form.action = form.action.replace('/0/', `/${this.value}/`);
+    }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelector('button[type="submit"]').disabled = true;
+});
+</script>
+{% endblock %}

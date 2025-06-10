@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-kpd2@cuv#q5u9qub9ey5w-v(x4_-xk)w3oi9=evce$(=5r)g6m'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # For production
 ALLOWED_HOSTS = ['realtime-awxx.onrender.com', 'localhost', '127.0.0.1']
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'transactions',
     'admin_panel',
     'notifications',
+    'user_actions',
 ]
 
 # Tailwind configuration
@@ -58,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'admin_panel.middleware.MaintenanceModeMiddleware',
+    'investment_site.middleware.PendingActionMiddleware',
 ]
 
 ROOT_URLCONF = 'investment_site.urls'

@@ -336,6 +336,18 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{% url 'manage_user_actions' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'reports' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-file-alt w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'reports' %}text-primary-400{% endif %}"></i>
+                            <span class="ml-3">User Action</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'manage_plans' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'reports' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-file-alt w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'reports' %}text-primary-400{% endif %}"></i>
+                            <span class="ml-3">Action Plans</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{% url 'system_settings' %}" class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-800 group transition-colors {% if request.resolver_match.url_name == 'system_settings' %}bg-gray-800 text-white{% endif %}">
                             <i class="fas fa-cog w-6 text-gray-400 group-hover:text-primary-400 {% if request.resolver_match.url_name == 'system_settings' %}text-primary-400{% endif %}"></i>
                             <span class="ml-3">Settings</span>

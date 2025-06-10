@@ -9,6 +9,8 @@ from django.core.paginator import Paginator
 from accounts.models import Profile, KYC
 from transactions.models import Transaction
 from dashboard.models import Investment, Balance, InvestmentPlan, Activity
+from user_actions.models import AccountUpgradePlan, SignalPlan, UserAction
+from user_actions.models import UserAction
 from wallet.models import Bank, CryptoWallet, Card
 from notifications.utils import create_notification
 from datetime import datetime, timedelta
@@ -261,27 +263,23 @@ def reject_user(request, user_id):
 @user_passes_test(is_admin)
 def pending_deposits(request):
     """View for pending and approved deposits"""
-    # Get the active tab from the request
     active_tab = request.GET.get('tab', 'pending')
     
-    # Get search parameters
     search_query = request.GET.get('search', '')
     date_from = request.GET.get('date_from', '')
     date_to = request.GET.get('date_to', '')
     
-    # Base query for deposits based on active tab
     if active_tab == 'approved':
         deposits = Transaction.objects.filter(
             transaction_type='deposit', 
             status='completed'
         ).order_by('-created_at')
-    else:  # Default to pending
+    else:
         deposits = Transaction.objects.filter(
             transaction_type='deposit', 
             status='pending'
         ).order_by('-created_at')
     
-    # Apply search filter if provided
     if search_query:
         deposits = deposits.filter(
             Q(user__email__icontains=search_query) |
@@ -290,7 +288,6 @@ def pending_deposits(request):
             Q(transaction_id__icontains=search_query)
         )
     
-    # Apply date filters if provided
     if date_from:
         try:
             date_from = datetime.strptime(date_from, '%Y-%m-%d').date()
@@ -305,12 +302,10 @@ def pending_deposits(request):
         except ValueError:
             pass
     
-    # Paginate results
-    paginator = Paginator(deposits, 20)  # Show 20 deposits per page
+    paginator = Paginator(deposits, 20)
     page_number = request.GET.get('page')
     deposits_page = paginator.get_page(page_number)
     
-    # Count totals for both tabs
     pending_count = Transaction.objects.filter(transaction_type='deposit', status='pending').count()
     approved_count = Transaction.objects.filter(transaction_type='deposit', status='completed').count()
     
@@ -326,11 +321,10 @@ def pending_deposits(request):
     
     return render(request, 'admin_panel/pending_deposits.html', context)
 
-
 @login_required
 @user_passes_test(is_admin)
 def approve_deposit(request, transaction_id):
-    """Approve a deposit"""
+    """Approve a deposit and update linked user actions"""
     transaction = get_object_or_404(Transaction, id=transaction_id, transaction_type='deposit', status='pending')
     
     # Update transaction status
@@ -342,44 +336,45 @@ def approve_deposit(request, transaction_id):
         wallet = CryptoWallet.objects.get(user=transaction.user, crypto_type=transaction.crypto_type)
         wallet.balance += transaction.amount
         wallet.save()
-        
-        # Update user's balance
-        try:
-            balance = Balance.objects.get(user=transaction.user)
-            balance.total += transaction.amount
-            balance.deposit += transaction.amount
-            balance.save()
-        except Balance.DoesNotExist:
-            Balance.objects.create(
-                user=transaction.user,
-                total=transaction.amount,
-                deposit=transaction.amount,
-                profit=0,
-                bonus=0
-            )
     except CryptoWallet.DoesNotExist:
-        # Create wallet if it doesn't exist
-        CryptoWallet.objects.create(
+        wallet = CryptoWallet.objects.create(
             user=transaction.user,
             crypto_type=transaction.crypto_type,
             balance=transaction.amount,
             address=f'{transaction.crypto_type.lower()}-{transaction.user.id}-{hash(transaction.user.email)[:8]}'
         )
-        
-        # Update user's balance
-        try:
-            balance = Balance.objects.get(user=transaction.user)
-            balance.total += transaction.amount
-            balance.deposit += transaction.amount
-            balance.save()
-        except Balance.DoesNotExist:
-            Balance.objects.create(
-                user=transaction.user,
-                total=transaction.amount,
-                deposit=transaction.amount,
-                profit=0,
-                bonus=0
-            )
+    
+    # Update user's balance
+    try:
+        balance = Balance.objects.get(user=transaction.user)
+        balance.total += transaction.amount
+        balance.deposit += transaction.amount
+        balance.save()
+    except Balance.DoesNotExist:
+        Balance.objects.create(
+            user=transaction.user,
+            total=transaction.amount,
+            deposit=transaction.amount,
+            profit=0,
+            bonus=0
+        )
+    
+    # Check for linked user actions
+    action = UserAction.objects.filter(transaction=transaction, status='pending').first()
+    if action:
+        action.status = 'completed'
+        action.save()
+        create_notification(
+            transaction.user,
+            'action_deposit',
+            'Action Deposit Approved',
+            f'Your deposit of {transaction.amount} {transaction.crypto_type} for {action.get_action_type_display()} has been approved.'
+        )
+        Activity.objects.create(
+            user=transaction.user,
+            activity_type='other',
+            description=f'Deposit of {transaction.amount} {transaction.crypto_type} for {action.get_action_type_display()} approved.'
+        )
     
     # Create notification for user
     create_notification(
@@ -402,16 +397,32 @@ def approve_deposit(request, transaction_id):
     messages.success(request, f'Deposit of {transaction.amount} {transaction.crypto_type} for user {transaction.user.email} has been approved.')
     return redirect('pending_deposits')
 
-
 @login_required
 @user_passes_test(is_admin)
 def reject_deposit(request, transaction_id):
-    """Reject a deposit"""
+    """Reject a deposit and update linked user actions"""
     transaction = get_object_or_404(Transaction, id=transaction_id, transaction_type='deposit', status='pending')
     
     # Update transaction status
     transaction.status = 'rejected'
     transaction.save()
+    
+    # Check for linked user actions
+    action = UserAction.objects.filter(transaction=transaction, status='pending').first()
+    if action:
+        action.status = 'rejected'
+        action.save()
+        create_notification(
+            transaction.user,
+            'action_deposit',
+            'Action Deposit Rejected',
+            f'Your deposit of {transaction.amount} {transaction.crypto_type} for {action.get_action_type_display()} has been rejected.'
+        )
+        Activity.objects.create(
+            user=transaction.user,
+            activity_type='other',
+            description=f'Deposit of {transaction.amount} {transaction.crypto_type} for {action.get_action_type_display()} rejected.'
+        )
     
     # Create notification for user
     create_notification(
@@ -1386,3 +1397,288 @@ def delete_payment_method(request, method_id):
             messages.error(request, "Card not found.")
     
     return redirect(f"{reverse('payment_methods')}?tab={method_type}")
+
+@login_required
+@user_passes_test(is_admin)
+def manage_user_actions(request):
+    """Admin view to manage user actions"""
+    active_tab = request.GET.get('tab', 'pending')
+    
+    if active_tab == 'completed':
+        actions = UserAction.objects.filter(status='completed').order_by('-created_at')
+    else:
+        actions = UserAction.objects.filter(status='pending').order_by('-created_at')
+    
+    paginator = Paginator(actions, 20)
+    page_number = request.GET.get('page')
+    actions_page = paginator.get_page(page_number)
+    
+    pending_count = UserAction.objects.filter(status='pending').count()
+    completed_count = UserAction.objects.filter(status='completed').count()
+    
+    # Get all active non-staff users for the assign action dropdown
+    users = User.objects.filter(is_staff=False, is_active=True).order_by('email')
+    
+    # Debug: Log user count and sample data
+    print(f"Users found: {users.count()}")
+    if users.exists():
+        print(f"Sample users: {list(users.values('id', 'email', 'is_staff', 'is_active')[:5])}")
+    
+    context = {
+        'actions': actions_page,
+        'active_tab': active_tab,
+        'pending_count': pending_count,
+        'completed_count': completed_count,
+        'users': users,
+    }
+    return render(request, 'admin_panel/manage_user_actions.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def assign_action(request, user_id):
+    """Admin view to assign a new action to a user"""
+    user = get_object_or_404(User, id=user_id)
+    account_upgrade_plans = AccountUpgradePlan.objects.filter(is_active=True)
+    signal_plans = SignalPlan.objects.filter(is_active=True)
+    
+    if request.method == 'POST':
+        action_type = request.POST.get('action_type')
+        plan_id = request.POST.get('plan_id')
+        
+        if not plan_id:
+            messages.error(request, 'Please select a plan.')
+            return render(request, 'admin_panel/assign_action.html', {
+                'user': user,
+                'account_upgrade_plans': account_upgrade_plans,
+                'signal_plans': signal_plans,
+                'form_errors': True,
+            })
+        
+        try:
+            if action_type == 'account_upgrade':
+                plan = AccountUpgradePlan.objects.get(id=plan_id, is_active=True)
+                UserAction.objects.create(
+                    user=user,
+                    action_type=action_type,
+                    account_upgrade_plan=plan,
+                    amount=plan.cost,
+                    status='pending'
+                )
+            elif action_type == 'signal':
+                plan = SignalPlan.objects.get(id=plan_id, is_active=True)
+                UserAction.objects.create(
+                    user=user,
+                    action_type=action_type,
+                    signal_plan=plan,
+                    amount=plan.cost,
+                    status='pending'
+                )
+            else:
+                messages.error(request, 'Invalid action type.')
+                return redirect('manage_user_actions')
+            
+            messages.success(request, f'Action "{action_type.replace("_", " ").title()}" assigned to {user.email}.')
+            return redirect('manage_user_actions')
+        except (AccountUpgradePlan.DoesNotExist, SignalPlan.DoesNotExist):
+            messages.error(request, 'Selected plan does not exist.')
+    
+    context = {
+        'user': user,
+        'account_upgrade_plans': account_upgrade_plans,
+        'signal_plans': signal_plans,
+        'form_errors': False,
+    }
+    return render(request, 'admin_panel/assign_action.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def approve_action_deposit(request, action_id):
+    """Admin view to approve an action deposit"""
+    action = get_object_or_404(UserAction, id=action_id, status='pending')
+    transaction = action.transaction
+
+    if not transaction or transaction.status != 'pending':
+        messages.error(request, 'No pending transaction found for this action.')
+        return redirect('manage_user_actions')
+
+    transaction.status = 'completed'
+    transaction.save()
+
+    action.status = 'completed'
+    action.save()
+
+    wallet = CryptoWallet.objects.filter(user=action.user, crypto_type=transaction.crypto_type).first()
+    if not wallet:
+        wallet = CryptoWallet.objects.create(
+            user=action.user,
+            crypto_type=transaction.crypto_type,
+            balance=transaction.amount,
+            address=f'{transaction.crypto_type.lower()}-{action.user.id}-{hash(action.user.email)[:8]}'
+        )
+    else:
+        wallet.balance += transaction.amount
+        wallet.save()
+
+    create_notification(
+        action.user,
+        'action_deposit',
+        'Action Deposit Approved',
+        f'Your deposit of {transaction.amount} {transaction.crypto_type} for {action.get_action_type_display()} has been approved.'
+    )
+
+    from dashboard.models import Activity
+    Activity.objects.create(
+        user=action.user,
+        activity_type='other',
+        description=f'Deposit of {transaction.amount} {transaction.crypto_type} for {action.get_action_type_display()} approved.'
+    )
+
+    messages.success(request, f'Deposit for {action.get_action_type_display()} for user {action.user.email} approved.')
+    return redirect('manage_user_actions')
+
+@login_required
+@user_passes_test(is_admin)
+def reject_action_deposit(request, action_id):
+    """Admin view to reject an action deposit"""
+    action = get_object_or_404(UserAction, id=action_id, status='pending')
+    transaction = action.transaction
+
+    if not transaction or transaction.status != 'pending':
+        messages.error(request, 'No pending transaction found for this action.')
+        return redirect('manage_user_actions')
+
+    transaction.status = 'rejected'
+    transaction.save()
+
+    action.status = 'rejected'
+    action.save()
+
+    create_notification(
+        action.user,
+        'action_deposit',
+        'Action Deposit Rejected',
+        f'Your deposit of {transaction.amount} {transaction.crypto_type} for {action.get_action_type_display()} has been rejected.'
+    )
+
+    from dashboard.models import Activity
+    Activity.objects.create(
+        user=action.user,
+        activity_type='other',
+        description=f'Deposit of {transaction.amount} {transaction.crypto_type} for {action.get_action_type_display()} rejected.'
+    )
+
+    messages.success(request, f'Deposit for {action.get_action_type_display()} for user {action.user.email} rejected.')
+    return redirect('manage_user_actions')
+
+@login_required
+@user_passes_test(is_admin)
+def manage_plans(request):
+    """Admin view to manage account upgrade and signal plans"""
+    upgrade_plans = AccountUpgradePlan.objects.all()
+    signal_plans = SignalPlan.objects.all()
+
+    context = {
+        'upgrade_plans': upgrade_plans,
+        'signal_plans': signal_plans,
+    }
+    return render(request, 'admin_panel/manage_plans.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def add_plan(request, plan_type):
+    """Admin view to add a new plan"""
+    if plan_type not in ['account_upgrade', 'signal']:
+        messages.error(request, 'Invalid plan type.')
+        return redirect('manage_plans')
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        cost = request.POST.get('cost')
+        duration_days = request.POST.get('duration_days')
+        is_active = request.POST.get('is_active') == 'on'
+
+        try:
+            if plan_type == 'account_upgrade':
+                AccountUpgradePlan.objects.create(
+                    name=name,
+                    description=description,
+                    cost=float(cost),
+                    duration_days=int(duration_days),
+                    is_active=is_active
+                )
+            else:
+                SignalPlan.objects.create(
+                    name=name,
+                    description=description,
+                    cost=float(cost),
+                    duration_days=int(duration_days),
+                    is_active=is_active
+                )
+            messages.success(request, f'{plan_type.replace("_", " ").title()} plan "{name}" created successfully.')
+            return redirect('manage_plans')
+        except ValueError:
+            messages.error(request, 'Invalid input. Please check your values.')
+
+    context = {
+        'plan_type': plan_type,
+    }
+    return render(request, 'admin_panel/add_plan.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def edit_plan(request, plan_type, plan_id):
+    """Admin view to edit a plan"""
+    if plan_type not in ['account_upgrade', 'signal']:
+        messages.error(request, 'Invalid plan type.')
+        return redirect('manage_plans')
+
+    plan_model = AccountUpgradePlan if plan_type == 'account_upgrade' else SignalPlan
+    plan = get_object_or_404(plan_model, id=plan_id)
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        cost = request.POST.get('cost')
+        duration_days = request.POST.get('duration_days')
+        is_active = request.POST.get('is_active') == 'on'
+
+        try:
+            plan.name = name
+            plan.description = description
+            plan.cost = float(cost)
+            plan.duration_days = int(duration_days)
+            plan.is_active = is_active
+            plan.save()
+            messages.success(request, f'{plan_type.replace("_", " ").title()} plan "{name}" updated successfully.')
+            return redirect('manage_plans')
+        except ValueError:
+            messages.error(request, 'Invalid input. Please check your values.')
+
+    context = {
+        'plan': plan,
+        'plan_type': plan_type,
+    }
+    return render(request, 'admin_panel/edit_plan.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def delete_plan(request, plan_type, plan_id):
+    """Admin view to delete a plan"""
+    if plan_type not in ['account_upgrade', 'signal']:
+        messages.error(request, 'Invalid plan type.')
+        return redirect('manage_plans')
+
+    plan_model = AccountUpgradePlan if plan_type == 'account_upgrade' else SignalPlan
+    plan = get_object_or_404(plan_model, id=plan_id)
+
+    if UserAction.objects.filter(
+        **{f'{plan_type}_plan': plan, 'status': 'pending'}
+    ).exists():
+        messages.error(request, f'Cannot delete plan "{plan.name}" because there are pending actions using it.')
+        return redirect('manage_plans')
+
+    plan_name = plan.name
+    plan.delete()
+    messages.success(request, f'{plan_type.replace("_", " ").title()} plan "{plan_name}" deleted successfully.')
+    return redirect('manage_plans')
